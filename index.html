@@ -6,960 +6,348 @@
     <title>FIFA WORLD CUP 2026</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
-    />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
     <style>
       @import url("https://fonts.googleapis.com/css2?family=Goldman:wght@400;700&family=Plus+Jakarta+Sans:wght@400;600;800&display=swap");
 
-      body {
-        background: #010409;
-        color: #f8fafc;
-        font-family: "Plus Jakarta Sans", sans-serif;
-        margin: 0;
-        overflow-x: hidden;
-      }
+      body { background: #010409; color: #f8fafc; font-family: "Plus Jakarta Sans", sans-serif; margin: 0; overflow-x: hidden; }
+      .main-bg-wrapper { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; overflow: hidden; }
+      .main-bg { width: 110%; height: 110%; position: absolute; top: -5%; left: -5%; background: linear-gradient(rgba(1, 4, 9, 0.85), rgba(1, 4, 9, 0.95)), url("https://library.sportingnews.com/styles/twitter_card_120x120/s3/2025-11/World-Cup-2026-umbrella-FTR-%281%29.jpg?itok=EmUuGN-R"); background-size: cover; background-position: center; animation: ken-burns 40s infinite alternate ease-in-out; }
+      @keyframes ken-burns { from { transform: scale(1); } to { transform: scale(1.1); } }
+      
+      .glass { background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(25px); border: 1px solid rgba(212, 175, 55, 0.2); }
+      .worldcup-font { font-family: "Goldman", cursive; }
 
-      .main-bg-wrapper {
-        position: fixed;
-        top: 0;
-        left: 0;
+      /* Sidebar */
+      #sidebar { position: fixed; top: 0; left: -350px; width: 320px; height: 100%; background: rgba(1, 10, 25, 0.98); backdrop-filter: blur(40px); z-index: 1000; transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); border-right: 1px solid rgba(212, 175, 55, 0.3); }
+      #sidebar.active { left: 0; }
+      .menu-item { padding: 1.2rem 2rem; border-bottom: 1px solid rgba(255, 255, 255, 0.05); transition: 0.3s; cursor: pointer; display: flex; align-items: center; gap: 15px; font-weight: 800; text-transform: uppercase; font-size: 14px; color: #cbd5e1; }
+      .menu-item:hover { background: rgba(212, 175, 55, 0.15); color: #d4af37; }
+      #overlay { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.8); z-index: 950; display: none; }
+
+      /* Team Card */
+      @keyframes blink-gold { 0%, 100% { border-color: rgba(212, 175, 55, 0.2); box-shadow: 0 0 15px rgba(212, 175, 55, 0.1); } 50% { border-color: rgba(212, 175, 55, 1); box-shadow: 0 0 30px rgba(212, 175, 55, 0.4); } }
+      .team-circle { transition: all 0.4s ease; border: 3px solid rgba(212, 175, 55, 0.3); animation: blink-gold 3s infinite ease-in-out; display: flex; flex-direction: column; align-items: center; padding: 2rem 1.5rem; border-radius: 3rem; min-height: 450px; cursor: pointer; }
+      .team-circle:hover { transform: translateY(-10px) scale(1.02); background: rgba(212, 175, 55, 0.1); }
+
+      .phase-btn { background: rgba(30, 41, 59, 0.6); border: 1px solid rgba(255, 255, 255, 0.1); transition: 0.2s; color: #94a3b8; font-size: 14px; font-weight: 700; }
+      .phase-btn.active { background: #d4af37 !important; color: #001f3f !important; font-weight: 900; transform: scale(1.1); }
+      
+      .match-mini { width: 100%; margin-top: 1.5rem; border-top: 1px solid rgba(212, 175, 55, 0.2); padding-top: 1rem; }
+      .match-mini-item { display: flex; flex-direction: column; margin-bottom: 0.75rem; font-size: 13px; }
+      .match-mini-header { display: flex; justify-content: space-between; font-weight: 600; color: #94a3b8; margin-bottom: 2px; }
+      .match-mini-vs { color: #ffffff; font-weight: 800; text-align: center; }
+      .match-mini-time { color: #d4af37; font-family: "Goldman"; font-weight: 700; }
+
+      /* Popup Team Detail - CẬP NHẬT HIỂN THỊ ẢNH */
+      #team-popup { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 2000; width: 90%; max-width: 700px; max-height: 85vh; overflow-y: auto; border-radius: 3rem; border: 2px solid #d4af37; box-shadow: 0 0 50px rgba(0,0,0,0.9); }
+      .no-scrollbar::-webkit-scrollbar { display: none; }
+      
+      .popup-img-container {
         width: 100%;
-        height: 100%;
-        z-index: -1;
+        background: rgba(0, 0, 0, 0.3);
+        border-radius: 1.5rem;
         overflow: hidden;
-      }
-      .main-bg {
-        width: 110%;
-        height: 110%;
-        position: absolute;
-        top: -5%;
-        left: -5%;
-        background: linear-gradient(rgba(1, 4, 9, 0.85), rgba(1, 4, 9, 0.95)),
-          url("https://library.sportingnews.com/styles/twitter_card_120x120/s3/2025-11/World-Cup-2026-umbrella-FTR-%281%29.jpg?itok=EmUuGN-R");
-        background-size: cover;
-        background-position: center;
-        animation: ken-burns 40s infinite alternate ease-in-out;
-      }
-      @keyframes ken-burns {
-        from {
-          transform: scale(1);
-        }
-        to {
-          transform: scale(1.1);
-        }
-      }
-
-      .glass {
-        background: rgba(15, 23, 42, 0.75);
-        backdrop-filter: blur(25px);
-        border: 1px solid rgba(212, 175, 55, 0.2);
-      }
-      .worldcup-font {
-        font-family: "Goldman", cursive;
-      }
-
-      #sidebar {
-        position: fixed;
-        top: 0;
-        left: -350px;
-        width: 320px;
-        height: 100%;
-        background: rgba(1, 10, 25, 0.98);
-        backdrop-filter: blur(40px);
-        z-index: 1000;
-        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-        border-right: 1px solid rgba(212, 175, 55, 0.3);
-      }
-      #sidebar.active {
-        left: 0;
-      }
-      .menu-item {
-        padding: 1.5rem 2rem;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-        transition: 0.3s;
-        cursor: pointer;
+        border: 2px solid rgba(212, 175, 55, 0.4);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.5);
         display: flex;
-        align-items: center;
-        gap: 15px;
-        font-weight: 800;
-        text-transform: uppercase;
-        font-size: 13px;
-        color: #cbd5e1;
-      }
-      .menu-item:hover {
-        background: rgba(212, 175, 55, 0.15);
-        color: #d4af37;
-      }
-      #overlay {
-        position: fixed;
-        inset: 0;
-        background: rgba(0, 0, 0, 0.8);
-        z-index: 900;
-        display: none;
-      }
-
-      @keyframes blink-gold {
-        0%,
-        100% {
-          border-color: rgba(212, 175, 55, 0.2);
-          box-shadow: 0 0 10px rgba(212, 175, 55, 0.1);
-        }
-        50% {
-          border-color: rgba(212, 175, 55, 1);
-          box-shadow: 0 0 25px rgba(212, 175, 55, 0.4);
-        }
-      }
-      .team-circle {
-        cursor: pointer;
-        transition: all 0.4s ease;
-        border: 3px solid rgba(212, 175, 55, 0.3);
-        animation: blink-gold 3s infinite ease-in-out;
-        aspect-ratio: 1/1;
-        display: flex;
-        flex-direction: column;
         justify-content: center;
         align-items: center;
-        padding: 1.5rem;
-      }
-      .team-circle:hover {
-        transform: scale(1.05);
-        background: rgba(212, 175, 55, 0.1);
       }
 
-      .phase-btn {
-        background: rgba(30, 41, 59, 0.6);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        transition: 0.2s;
-        color: #94a3b8;
-        font-size: 12px;
-      }
-      .phase-btn.active {
-        background: #d4af37 !important;
-        color: #001f3f !important;
-        font-weight: 900;
-        transform: scale(1.1);
-      }
-
-      #sub-navigation::-webkit-scrollbar {
-        height: 4px;
-      }
-      #sub-navigation::-webkit-scrollbar-thumb {
-        background: #d4af37;
-        border-radius: 10px;
+      /* object-fit: contain giúp hiển thị trọn vẹn toàn bộ ảnh không bị cắt */
+      .popup-team-img {
+        width: 100%;
+        height: auto;
+        max-height: 400px;
+        object-fit: contain; 
+        display: block;
       }
     </style>
   </head>
   <body>
     <div class="main-bg-wrapper"><div class="main-bg"></div></div>
-    <div id="overlay" onclick="toggleMenu()"></div>
+    <div id="overlay" onclick="closePopup(); toggleMenu(false);"></div>
 
-    <button
-      onclick="toggleMenu()"
-      class="fixed top-8 left-8 z-[1100] w-14 h-14 glass rounded-2xl flex items-center justify-center text-[#D4AF37] text-2xl border border-[#D4AF37]/50 hover:scale-110 transition-transform shadow-2xl"
-    >
+    <!-- Popup chi tiết nước -->
+    <div id="team-popup" class="glass p-6 md:p-8 no-scrollbar">
+        <button onclick="closePopup()" class="absolute top-6 right-6 text-white text-2xl opacity-70 hover:opacity-100 hover:text-[#d4af37] z-10"><i class="fa-solid fa-circle-xmark"></i></button>
+        <div id="popup-content"></div>
+    </div>
+
+    <button onclick="toggleMenu(true)" class="fixed top-8 left-8 z-[1100] w-14 h-14 glass rounded-2xl flex items-center justify-center text-[#D4AF37] text-2xl border border-[#D4AF37]/50 hover:scale-110 transition-transform shadow-2xl">
       <i class="fa-solid fa-bars-staggered"></i>
     </button>
 
     <nav id="sidebar">
-      <div
-        class="pt-28 pb-8 px-8 border-b border-white/10 flex justify-between items-center"
-      >
-        <span
-          class="worldcup-font text-3xl text-[#D4AF37] italic tracking-tighter uppercase"
-          >Tournament</span
-        >
-        <button
-          onclick="toggleMenu()"
-          class="text-slate-400 hover:text-white text-2xl"
-        >
-          <i class="fa-solid fa-xmark"></i>
-        </button>
+      <div class="pt-28 pb-8 px-8 border-b border-white/10 flex justify-between items-center">
+        <span class="worldcup-font text-3xl text-[#D4AF37] italic uppercase">FIFA 2026</span>
+        <button onclick="toggleMenu(false)" class="text-slate-400 hover:text-white text-2xl"><i class="fa-solid fa-xmark"></i></button>
       </div>
       <div class="py-4">
-        <div class="menu-item" onclick="initHomeMode(); toggleMenu();">
-          <i class="fa-solid fa-house text-gold"></i> Trang Chủ
-        </div>
-        <div class="menu-item" onclick="switchToDayMode()">
-          <i class="fa-solid fa-calendar-day text-[#00f2ff]"></i> Vòng Bảng
-          (Theo Ngày)
-        </div>
-        <div class="menu-item" onclick="renderKnockout('Vòng 32 đội')">
-          <i class="fa-solid fa-users-viewfinder"></i> Vòng 32 đội
-        </div>
-        <div class="menu-item" onclick="renderKnockout('Vòng 16 đội')">
-          <i class="fa-solid fa-sitemap"></i> Vòng 16 đội
-        </div>
-        <div class="menu-item" onclick="renderKnockout('Vòng Tứ Kết')">
-          <i class="fa-solid fa-trophy"></i> Vòng Tứ Kết
-        </div>
-        <div class="menu-item text-white" onclick="triggerFinal()">
-          <i class="fa-solid fa-crown text-yellow-400"></i> Chung Kết
-        </div>
+        <div class="menu-item" onclick="location.reload()"><i class="fa-solid fa-house"></i> Trang Chủ</div>
+        <div class="menu-item" onclick="switchToDayMode()"><i class="fa-solid fa-calendar-day"></i> Vòng Bảng (Ngày)</div>
+        <div class="menu-item" onclick="renderKnockout('Vòng 32 đội')"><i class="fa-solid fa-users-viewfinder"></i> Vòng 32 đội</div>
+        <div class="menu-item" onclick="renderKnockout('Vòng 16 đội')"><i class="fa-solid fa-sitemap"></i> Vòng 16 đội</div>
+        <div class="menu-item" onclick="renderKnockout('Vòng Tứ Kết')"><i class="fa-solid fa-trophy"></i> Vòng Tứ Kết</div>
+        <div class="menu-item" onclick="renderKnockout('Vòng Bán Kết')"><i class="fa-solid fa-bolt text-yellow-400"></i> Vòng Bán Kết</div>
+        <div class="menu-item" onclick="renderKnockout('Tranh Hạng Ba')"><i class="fa-solid fa-medal text-slate-400"></i> Tranh Hạng Ba</div>
+        <div class="menu-item text-white font-black" onclick="triggerFinal()"><i class="fa-solid fa-crown text-yellow-400"></i> Chung Kết</div>
       </div>
     </nav>
 
     <div class="pt-20 pb-10 flex flex-col items-center">
-      <h1
-        class="text-6xl md:text-9xl font-black worldcup-font italic text-white uppercase tracking-tighter mb-10 text-center drop-shadow-2xl"
-      >
-        FIFA WORLD CUP <span class="text-[#D4AF37]">2026</span>
+      <h1 class="text-6xl md:text-9xl font-black worldcup-font italic text-white uppercase tracking-tighter mb-10 text-center drop-shadow-2xl">
+        FIFA WORLD <span class="text-[#D4AF37]">2026</span>
       </h1>
 
-      <div
-        class="flex flex-wrap justify-center gap-3 md:gap-5 mb-12"
-        id="countdown"
-      >
-        <div
-          class="glass px-4 py-4 md:px-6 rounded-3xl min-w-[80px] md:min-w-[100px] text-center"
-        >
-          <span
-            id="days"
-            class="block text-3xl md:text-4xl font-black worldcup-font text-[#D4AF37]"
-            >00</span
-          >
-          <span class="text-[10px] font-bold text-slate-400 uppercase"
-            >Ngày</span
-          >
-        </div>
-        <div
-          class="glass px-4 py-4 md:px-6 rounded-3xl min-w-[80px] md:min-w-[100px] text-center"
-        >
-          <span
-            id="hours"
-            class="block text-3xl md:text-4xl font-black worldcup-font text-white"
-            >00</span
-          >
-          <span class="text-[10px] font-bold text-slate-400 uppercase"
-            >Giờ</span
-          >
-        </div>
-        <div
-          class="glass px-4 py-4 md:px-6 rounded-3xl min-w-[80px] md:min-w-[100px] text-center border-white/10"
-        >
-          <span
-            id="minutes"
-            class="block text-3xl md:text-4xl font-black worldcup-font text-white opacity-80"
-            >00</span
-          >
-          <span class="text-[10px] font-bold text-slate-400 uppercase"
-            >Phút</span
-          >
-        </div>
-        <div
-          class="glass px-4 py-4 md:px-6 rounded-3xl min-w-[80px] md:min-w-[100px] text-center border-[#00f2ff]/30"
-        >
-          <span
-            id="seconds"
-            class="block text-3xl md:text-4xl font-black worldcup-font text-[#00f2ff]"
-            >00</span
-          >
-          <span class="text-[10px] font-bold text-[#00f2ff]/60 uppercase"
-            >Giây</span
-          >
-        </div>
+      <div class="flex flex-wrap justify-center gap-3 md:gap-5 mb-12" id="countdown">
+        <div class="glass px-4 py-4 md:px-6 rounded-3xl min-w-[100px] text-center"><span id="days" class="block text-4xl md:text-5xl font-black worldcup-font text-[#D4AF37]">00</span><span class="text-[12px] font-bold text-slate-400 uppercase">Ngày</span></div>
+        <div class="glass px-4 py-4 md:px-6 rounded-3xl min-w-[100px] text-center"><span id="hours" class="block text-4xl md:text-5xl font-black worldcup-font text-white">00</span><span class="text-[12px] font-bold text-slate-400 uppercase">Giờ</span></div>
+        <div class="glass px-4 py-4 md:px-6 rounded-3xl min-w-[100px] text-center"><span id="minutes" class="block text-4xl md:text-5xl font-black worldcup-font text-white opacity-80">00</span><span class="text-[12px] font-bold text-slate-400 uppercase">Phút</span></div>
+        <div class="glass px-4 py-4 md:px-6 rounded-3xl min-w-[100px] text-center border-[#00f2ff]/30"><span id="seconds" class="block text-4xl md:text-5xl font-black worldcup-font text-[#00f2ff]">00</span><span class="text-[12px] font-bold text-[#00f2ff]/60 uppercase">Giây</span></div>
       </div>
 
-      <!-- PHẦN 4 TRẬN ĐẤU GẦN NHẤT MỚI THÊM -->
-      <div class="w-full max-w-6xl px-6 mb-16">
-        <div class="flex items-center gap-4 mb-6">
-          <div
-            class="h-px flex-1 bg-gradient-to-r from-transparent via-[#D4AF37]/50 to-transparent"
-          ></div>
-          <h3
-            class="worldcup-font text-xl text-[#D4AF37] uppercase italic tracking-widest"
-          >
-            Trận đấu sắp tới
-          </h3>
-          <div
-            class="h-px flex-1 bg-gradient-to-r from-transparent via-[#D4AF37]/50 to-transparent"
-          ></div>
-        </div>
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <!-- Trận 1 -->
-          <div
-            class="glass p-5 rounded-3xl border-l-4 border-l-[#D4AF37] hover:bg-white/5 transition-all"
-          >
-            <div class="flex justify-between items-center mb-3">
-              <span
-                class="text-[10px] font-bold text-slate-500 uppercase tracking-tighter"
-                >Bảng A • 12/06</span
-              >
-              <span
-                class="text-[10px] font-black text-[#D4AF37] bg-[#D4AF37]/10 px-2 py-0.5 rounded-full"
-                >02:00</span
-              >
-            </div>
-            <div class="flex flex-col gap-2">
-              <div class="flex items-center gap-3">
-                <img
-                  src="https://flagcdn.com/w40/mx.png"
-                  class="w-6 h-4 object-cover rounded-sm"
-                />
-                <span class="text-sm font-bold uppercase text-white"
-                  >Mexico</span
-                >
-              </div>
-              <div class="flex items-center gap-3">
-                <img
-                  src="https://flagcdn.com/w40/za.png"
-                  class="w-6 h-4 object-cover rounded-sm"
-                />
-                <span class="text-sm font-bold uppercase text-white"
-                  >Nam Phi</span
-                >
-              </div>
-            </div>
-          </div>
-          <!-- Trận 2 -->
-          <div
-            class="glass p-5 rounded-3xl border-l-4 border-l-[#D4AF37] hover:bg-white/5 transition-all"
-          >
-            <div class="flex justify-between items-center mb-3">
-              <span
-                class="text-[10px] font-bold text-slate-500 uppercase tracking-tighter"
-                >Bảng A • 12/06</span
-              >
-              <span
-                class="text-[10px] font-black text-[#D4AF37] bg-[#D4AF37]/10 px-2 py-0.5 rounded-full"
-                >09:00</span
-              >
-            </div>
-            <div class="flex flex-col gap-2">
-              <div class="flex items-center gap-3">
-                <img
-                  src="https://flagcdn.com/w40/kr.png"
-                  class="w-6 h-4 object-cover rounded-sm"
-                />
-                <span class="text-sm font-bold uppercase text-white"
-                  >Hàn Quốc</span
-                >
-              </div>
-              <div class="flex items-center gap-3">
-                <img
-                  src="https://flagcdn.com/w40/cz.png"
-                  class="w-6 h-4 object-cover rounded-sm"
-                />
-                <span class="text-sm font-bold uppercase text-white"
-                  >C.H Séc</span
-                >
-              </div>
-            </div>
-          </div>
-          <!-- Trận 3 -->
-          <div
-            class="glass p-5 rounded-3xl border-l-4 border-l-[#D4AF37] hover:bg-white/5 transition-all"
-          >
-            <div class="flex justify-between items-center mb-3">
-              <span
-                class="text-[10px] font-bold text-slate-500 uppercase tracking-tighter"
-                >Bảng B • 13/06</span
-              >
-              <span
-                class="text-[10px] font-black text-[#D4AF37] bg-[#D4AF37]/10 px-2 py-0.5 rounded-full"
-                >02:00</span
-              >
-            </div>
-            <div class="flex flex-col gap-2">
-              <div class="flex items-center gap-3">
-                <img
-                  src="https://flagcdn.com/w40/ca.png"
-                  class="w-6 h-4 object-cover rounded-sm"
-                />
-                <span class="text-sm font-bold uppercase text-white"
-                  >Canada</span
-                >
-              </div>
-              <div class="flex items-center gap-3">
-                <img
-                  src="https://flagcdn.com/w40/ba.png"
-                  class="w-6 h-4 object-cover rounded-sm"
-                />
-                <span class="text-sm font-bold uppercase text-white"
-                  >Bosnia</span
-                >
-              </div>
-            </div>
-          </div>
-          <!-- Trận 4 -->
-          <div
-            class="glass p-5 rounded-3xl border-l-4 border-l-[#D4AF37] hover:bg-white/5 transition-all"
-          >
-            <div class="flex justify-between items-center mb-3">
-              <span
-                class="text-[10px] font-bold text-slate-500 uppercase tracking-tighter"
-                >Bảng D • 13/06</span
-              >
-              <span
-                class="text-[10px] font-black text-[#D4AF37] bg-[#D4AF37]/10 px-2 py-0.5 rounded-full"
-                >08:00</span
-              >
-            </div>
-            <div class="flex flex-col gap-2">
-              <div class="flex items-center gap-3">
-                <img
-                  src="https://flagcdn.com/w40/us.png"
-                  class="w-6 h-4 object-cover rounded-sm"
-                />
-                <span class="text-sm font-bold uppercase text-white">Mỹ</span>
-              </div>
-              <div class="flex items-center gap-3">
-                <img
-                  src="https://flagcdn.com/w40/py.png"
-                  class="w-6 h-4 object-cover rounded-sm"
-                />
-                <span class="text-sm font-bold uppercase text-white"
-                  >Paraguay</span
-                >
-              </div>
-            </div>
-          </div>
-        </div>
+      <div class="w-full max-w-6xl px-6 mb-16" id="top-matches-section">
+        <div class="flex items-center gap-4 mb-6"><div class="h-px flex-1 bg-gradient-to-r from-transparent via-[#D4AF37]/50 to-transparent"></div><h3 class="worldcup-font text-2xl text-[#D4AF37] uppercase italic tracking-widest">Trận đấu sắp tới</h3><div class="h-px flex-1 bg-gradient-to-r from-transparent via-[#D4AF37]/50 to-transparent"></div></div>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4" id="recent-grid"></div>
       </div>
     </div>
 
     <div class="max-w-7xl mx-auto px-6 relative z-20">
       <div class="text-center mb-12">
-        <h2
-          id="display-title"
-          class="worldcup-font text-5xl text-white italic uppercase tracking-tighter mb-10"
-        >
-          Vòng Bảng
-        </h2>
-        <div
-          id="sub-navigation"
-          class="flex flex-wrap justify-center gap-3 px-2 pb-6 overflow-x-auto"
-        ></div>
+        <h2 id="display-title" class="worldcup-font text-6xl text-white italic uppercase tracking-tighter mb-10">Vòng Bảng</h2>
+        <div id="sub-navigation" class="flex flex-wrap justify-center gap-3 px-2 pb-6 overflow-x-auto no-scrollbar"></div>
       </div>
-
-      <div
-        id="main-display"
-        class="glass p-10 md:p-16 rounded-[5rem] mb-12 min-h-[600px] flex flex-col items-center justify-start"
-      ></div>
-
-      <div class="mt-4 text-center pb-20">
-        <p
-          class="text-[12px] text-slate-600 font-black uppercase tracking-[0.6em] mb-2"
-        >
-          Powered By
-        </p>
-        <p class="text-lg font-black text-slate-400 italic uppercase">Erika</p>
-      </div>
+      <div id="main-display" class="glass p-10 md:p-16 rounded-[4rem] mb-12 min-h-[600px] flex flex-col items-center"></div>
+      <div class="mt-4 text-center pb-20"><p class="text-[14px] text-slate-600 font-black uppercase tracking-[0.6em] mb-2">Tournament 2026</p><p class="text-2xl font-black text-[#D4AF37] italic uppercase">Erika</p></div>
     </div>
 
     <script>
-      // Dữ liệu gốc của bạn giữ nguyên
       const groupTeams = {
         A: [
-          { n: "Mexico", c: "mx" },
-          { n: "Nam Phi", c: "za" },
-          { n: "Hàn Quốc", c: "kr" },
-          { n: "C.H Séc", c: "cz" },
+            { n: "Mexico", c: "mx", api: "https://digitalhub.fifa.com/transform/71fbe0d0-cb8c-4606-903b-bac186af0ac4/Mexico-team?focuspoint=0.53,0.38&io=transform:fill,width:768&quality=75" }, 
+            { n: "Nam Phi", c: "za", api: "https://digitalhub.fifa.com/transform/96110095-ecd8-4828-80d5-86c528a11c96/South-Africa-line-up-prior-to-a-match-at-the-2025-African-Cup-of-Nations?focuspoint=0.51,0.44&io=transform:fill,width:768&quality=75" }, 
+            { n: "Hàn Quốc", c: "kr", api: "https://images.openai.com/static-rsc-4/N-7uLmFG_ifcjfnGGhXqwqmT6V87ud3FW6rBM4LSAAsuWHnCm5ucQdTRncJsZIUBWH4A6pdhb0YqyNIBfXIauAw5AlGwyTgY-DkJyvIUxhwW7UHf4WADDi7kFVKkvH0h9VWsOhqQx1cYVAJa-f1EPNnxo-3JzCHzLOMTg2IBN-UkJDQpfopuDEH-RxFjkdOG?purpose=fullsize" }, 
+            { n: "C.H Séc", c: "cz", api: "https://images.openai.com/static-rsc-4/5vdhk02oe5TaKVXVeZkKiR_FO7NlgpIcS84Fs9VhsHn5GnpeTSsx1BoLSXRrnCucmHxGmOPCR92BMA7az-rayiYb2TJWw99Kc8X6x54v2Co0GspZOUm2_Mf8B4zRy52HaYhho2J5c3Hqr2ZU0S8EwN7T_5jQSn2BY_9Y_1qRZC9ep22JMxFeMCw30rkE64sT?purpose=fullsize" }
         ],
         B: [
-          { n: "Canada", c: "ca" },
-          { n: "Bosnia", c: "ba" },
-          { n: "Qatar", c: "qa" },
-          { n: "Thụy Sĩ", c: "ch" },
+            { n: "Canada", c: "ca", api: "https://images.openai.com/static-rsc-4/Fy5uibqKviQh5KeYIrzYp-7ttQTLk79wZ0WNy_L8MuN58m963-u4Ay4punSYSiuEC-iuqNjjlsIYZvhcfTzDGIlwkK0mWmoAvlse_pirBWT-2sFifsaf5wsOZ9Uj2LjEPK64OGQaDP-1qvNlCte2sAw2fiVBMcfFLBGnYjBTTtf1aR0cik8yaG-NbPD_YNHB?purpose=fullsize" }, 
+            { n: "Bosnia", c: "ba", api: "https://images.openai.com/static-rsc-4/YwIdh806v5F_X6G6jVsbOhAbwCpQGfxtOZkNgZ8LyiAFnW2iaSqY9AJ5T1ya1aopWie-MBCOpU_iquPIJ_MMboyX6afjETwTllexHt5-TTdPHYXdeb_e3jw6D9RU_808C07PvfV-QNRz73easOWo6lVr5ok2wciHwhzQzEFYbwGR3l4KzxTvZZGCz_Pfls14?purpose=fullsize" }, 
+            { n: "Qatar", c: "qa", api: "https://images.openai.com/static-rsc-4/owWwaiTLcYwkHisk_9MQgnPwGi9naWXKEI97WZP1B2ayDD-dWNEsBvcFBryrGwzKICbU23zztFvP53mkRTzyc7ktQ-gNIh8G7xziEgwBKVqrT_s-jY2HKILnW8uIJg7Ek1phySe3-Qv4PCLW9a5aPz_pDXK5FZ1GRY5FwhJtTRmd11_mP8DjzPi82U-36Kuz?purpose=fullsize" }, 
+            { n: "Thụy Sĩ", c: "ch", api: "https://images.openai.com/static-rsc-4/hwAkpwWaPbWcBhzHx1mmumuZW032vuG1kV4QRrtGMeTbfhXxGM3ZxO_Ae_uvCeAgjYcQQahe0VtPdHRgiJOka0iL0ShoulJHoQHCmCg8kFHNMcTBHxEVHORASzjs_XIk4ML_QmJLm1dlQynZN1mHr7eAzj7oQwvUwJDaIsSBYKc-fe10fCJHxs8I6bXIW3U1?purpose=fullsize" }
         ],
         C: [
-          { n: "Brazil", c: "br" },
-          { n: "Ma Rốc", c: "ma" },
-          { n: "Haiti", c: "ht" },
-          { n: "Scotland", c: "gb-sct" },
+            { n: "Brazil", c: "br", api: "https://images.openai.com/static-rsc-4/3V4aDbOfeVKVnKfmdeINlDjKSREoxoJLe34XrcSAivASkOCIJIA1KK15S6DTpBB-V9ddfKxshXBogbl8DBOMK67Pnrp7hdgX6Tk9gugzsqfOiebVtgbGCTlWDufuf5p00DOvjh-Gtye3TeYs18mkmFWyKmn3qVdHthbYgkxTZr0b9WbUH0Tdb22quIYNAFjT?purpose=fullsize" }, 
+            { n: "Ma Rốc", c: "ma", api: "https://images.openai.com/static-rsc-4/LwV6Vi7yIHq1lO4h9aGi4oe64xPDA46fY89ramMcI-LwBbqxbJe8B_ruhqVwMu8MolWNQ1sI5JTHLaUYOGXam2G1smmPw968xnHsXt0tGe1yrSwVb2Ho4_krJC7SjCQ7mAbs-rtzRaWTxO-Zi-AP_LjoNcOX4rYBL8WcoMuBAf3cNlCBd60oCEOn_KwtgtSz?purpose=fullsize" }, 
+            { n: "Haiti", c: "ht", api: "https://images.openai.com/static-rsc-4/sn5wrb1QKQ-oBX2MQNUMe2SaTVbHz1W7vPtBkWUD3wIAHIiXEZ8knxxbLQYE45YIQSOa9_4mB8iqFqL_TNqiekL6e7MVMaAnHG7og2lYFBMxG7hLP8sa0_JhJoMx-rOVpWsLZXWQtm5zWiPmevE8Ry9_t86NhRsgIATz6K7mjauSgiwtD1aorPhc0vROj09n?purpose=fullsize" }, 
+            { n: "Scotland", c: "gb-sct", api: "https://images.openai.com/static-rsc-4/HmlYam5yeiMlkrT0YbPT5w6EM5fFWN7KahopQy8wlfTahffNOya7oYdf8ehGhmYQRb-GOsFvmiSSYgdem-GXUUzsqLadpiFfa_2G3QggbmjVacgQey40c1GReAgCPGPXTreAUdlfMQsLFf9CpXSia-Mq1v8aHHn-7JtOqm-F6bwWJc6nsDdsvVnY9D-r1k5W?purpose=fullsize" }
         ],
         D: [
-          { n: "Mỹ", c: "us" },
-          { n: "Paraguay", c: "py" },
-          { n: "Úc", c: "au" },
-          { n: "Thổ Nhĩ Kỳ", c: "tr" },
+            { n: "Mỹ", c: "us", api: "https://images.openai.com/static-rsc-4/cN1odWy7TkmNhDkxLXwY0nQ9hCFI782lF_-G7PDmI7zQm4bQz_30cUYG7j_aoIe-81U0LU67rON0JbjyWNSacLDhQGnDdmG_wdeqXzdbeQpOEMXAkMa-Wze-3lU6Y4UKanVqQJHw95eRsRd-g4lBg8HD_bqwU6EEaBz0qDMGsQLycm7_m9Ao5s-NOcmk2XRm?purpose=fullsize" }, 
+            { n: "Paraguay", c: "py", api: "https://images.openai.com/static-rsc-4/7ZpffWISHHSRetflWUBv873Nkh1ppRLufeCha8grnwWCpA_-SdqrIKriUyY2HFyWRLfm__MPmp-xKD8KLS6065iAN6FfsVgQVJzz9IOxOGlBwNqWuAPtA2eBanSgrHDStu8fvc_AIXElF4ZusWMey4M37WrWRII1HfmT1zJ4cc8afDnV_sHDa4qKRJAUPg0I?purpose=fullsize" }, 
+            { n: "Úc", c: "au", api: "https://images.openai.com/static-rsc-4/4L1Jg-vBmlmEf3dcnDHJ5UYh-X4Ghz4vh-UTmVURmzOAAZ7VMBBZqjNIyxId8NQ85p8CwSocf0D5xtlQc9_-p-AbdpWc7HvuEIadrVgJjjGK2zbhdHYYyb9THteA1boJdpz91RkEZchyCOiw04CfkEDDBAO7SS7mDFaJ4FZZtKW0hCVChDlUSuQPK1Aieupt?purpose=fullsize" }, 
+            { n: "Thổ Nhĩ Kỳ", c: "tr", api: "https://images.openai.com/static-rsc-4/jpl0rEKOB1iCbojD7li5E-tN5BdXe1cz9afO2k-NzUPepGRGSYNMO58qFrhxjQ6oKlICcymSyTRIs7OyX_N7tW2RevZZnvWXJGPNn4BG6qQfH52fLTg_tuhfddo3l9p7si48PY1XhBUCPvKd0KKzeZKGal5djDHk7fWiJypN7FuwNuIiWvRWiDDAKFmlMyGR?purpose=fullsize" }
         ],
         E: [
-          { n: "Đức", c: "de" },
-          { n: "Curaçao", c: "cw" },
-          { n: "Bờ Biển Ngà", c: "ci" },
-          { n: "Ecuador", c: "ec" },
+            { n: "Đức", c: "de", api: "https://images.openai.com/static-rsc-4/ZWsPNpsEb2WcFmTLoye2zTdOIrmu_H8G3SNMHlKFlpJgJgRoc56GGfRxZD50q3GlRn8tVwxOu1QqEqrHlI_5x3OLIabYQSRVlc_lheYZMHDqYtamHLCMljreAOkLxtpPP-YddD254p6KddYUTGW6ElVIEyU2JUjDRSb2fsKJX97nDZR0mj5VWp99sJsZeDts?purpose=fullsize" }, 
+            { n: "Curaçao", c: "cw", api: "https://images.openai.com/static-rsc-4/jiK6zXAJRPMJc8sXdZI8XssNQstm0rHLyljfINYwe-lkFuokqFe6WsJrrAqQck0njQwri-x49VxHTeZlnFtOskbI6wDlIuAvjjodo9WFue5z6E00m5iyaQOyggxazX2WaZYstC2R-X5yZCRzY03tSf--jjwOjONIyAyNMB3IEgXBx4g-2owwWBuTTTUiqeQp?purpose=fullsize" }, 
+            { n: "Bờ Biển Ngà", c: "ci", api: "https://images.openai.com/static-rsc-4/C0SCH-gerBc5GDzG-l2ISElPyvHp1wWcRM_3LlmEopS9tmgv0LgzRKa0_O-el-NgBgcDKDeJ_0m4WbbUAiHTgDmdZg3MMV0FUCfc4d3AF15633p2-aSFHO6THFsybiF00TzB77wAdz2k3lqH34npgNmpi3_nub07e5L8PAb1g-cHh4xIRI-CO-PtbOvb0O__?purpose=fullsize" }, 
+            { n: "Ecuador", c: "ec", api: "https://images.openai.com/static-rsc-4/8nwZS7IUKkqMmccuT7qaVChlE0iqHQ_705gXL-hS8oSahHTz4w1Oq2lQsHRTqgxNoOJOM-CVROXw1iZXKCUjTGpJrkZS5JFoWfQrm8jN0uAjo5yMuAML3DK0w1KfaB4dVqdtL8u5W9LlcC0kwDr66s1AeP2sc1ZNkoA2VPfl14ZqiLD23BwJDrs89GXSMCsu?purpose=fullsize" }
         ],
         F: [
-          { n: "Hà Lan", c: "nl" },
-          { n: "Nhật Bản", c: "jp" },
-          { n: "Thụy Điển", c: "se" },
-          { n: "Tunisia", c: "tn" },
+            { n: "Hà Lan", c: "nl", api: "https://images.openai.com/static-rsc-4/gbMUAJ7lkIfnH4RrSo4E1diUYptkfrxvkVHQc1lNtJ375zcymzddkonF89DcoejKFSUAoa9MGJZ8vskPWQT0wTeJjo6LTcIAo3S535H0XBgPny8jz4JoN1qCBjqdg3I_D487O0dU9By2Mu9iUggzrAfcHQOv2c-wuqYP-Iniuvvfh0qXyTRxBqIMATh_65_r?purpose=fullsize" }, 
+            { n: "Nhật Bản", c: "jp", api: "https://images.openai.com/static-rsc-4/6v_yZx1YBhP8YeyISgeeNIS2B7q7Z-LyA0jDqXh7ove8cbx20w5WHbn7xdxRYE3hihwq9BQoKw8L2FW0T8b0kLG94JEe_EmSHVx4qjrKYpZkjEgS2mWV6aoUAG6wMLd4wIm_9XcxNAEswRk-SoAM_JwWqc0Ll3BI6H8_OiNB3qX09RuklK3HGa-DwfU49Yal?purpose=fullsize" }, 
+            { n: "Thụy Điển", c: "se", api: "https://images.openai.com/static-rsc-4/_CvDrwMrgiIqnz2Ut5Z5Y8HQt9x5p5k6SnmPU1rSj-ngIP3KT_i4TWwyCj69G7VaXCW-VDAj_B_csr5JQ_1QMbGx3yfj2Nku3f3ZPrRQV8W-RK9zv4hWAb4oEx07zg5GkSlhAItVcPCeTpDZMBvsB_sOZkiG1V9-YgTgHwaYqwOPkuO2g6dzX_NJzwx8cn38?purpose=fullsize" }, 
+            { n: "Tunisia", c: "tn", api: "https://images.openai.com/static-rsc-4/_CvDrwMrgiIqnz2Ut5Z5Y8HQt9x5p5k6SnmPU1rSj-ngIP3KT_i4TWwyCj69G7VaXCW-VDAj_B_csr5JQ_1QMbGx3yfj2Nku3f3ZPrRQV8W-RK9zv4hWAb4oEx07zg5GkSlhAItVcPCeTpDZMBvsB_sOZkiG1V9-YgTgHwaYqwOPkuO2g6dzX_NJzwx8cn38?purpose=fullsize" }
         ],
         G: [
-          { n: "Bỉ", c: "be" },
-          { n: "Ai Cập", c: "eg" },
-          { n: "Iran", c: "ir" },
-          { n: "New Zealand", c: "nz" },
+            { n: "Bỉ", c: "be", api: "https://images.openai.com/static-rsc-4/QTT0fbgZj2hDvNzmpJ1jgpZD70WeTET7MHewUfPG3upXdVaG6K2T36Go4rvbZOCM4sSsxhPGkMcIzO-4P-jWnUlvnFWLKpUPuigEZ6-QoSunSyx-RxXlvZCUZBS3lcuIBlHSp2w2SMhGLsQ8krTG9ggcLJrDn04Z4o5u81PG5srbentWRUzEWyHmrrdVJJxN?purpose=fullsize" }, 
+            { n: "Ai Cập", c: "eg", api: "https://images.openai.com/static-rsc-4/0HjHYdS_1wUcJ57Ioohy_afbu3nvwdvzsJNVnwGe5oz9jbpeW-iuuJcB1-jaPD0bndKe3ATdsFHSwRY609dfZCBAbj-QIZ_hEr1f5yNWaiumc067lZSQqYLIef4HoprsHUPgWULkVkulxRZd8MhApoOMG_THB05qTLq26kLoMAaksjOdetoD4TSzo43C_7X7?purpose=fullsize" }, 
+            { n: "Iran", c: "ir", api: "https://images.openai.com/static-rsc-4/J5WPacdX0rarZdW9itfsFa64BDIkqY99_Lq2KW2g95zNsft51-G5n0WQHr6lkjN1op1JheIA2aYovVfp_5GkuGU0gfOr5oniU9lmzf1XHTJy9cqndlr1no8DLrBIOYosH-uwFGH3MR8svfa-VAQvOkx41xgAIEwZ36A5gVtTkrF0QxBO783qiCHronZvf0A0?purpose=fullsize" }, 
+            { n: "New Zealand", c: "nz", api: "https://images.openai.com/static-rsc-4/usXLrToEl_QIFvCk1KAsa1BzUVojgEfHkzX6oXTTQfpjdfMtzMeT4m0RKweTPGpnp44CBr9TWdKIEnJSbqvKPItxKRCSKMfxyhzg6h9mHKwPeoJFjv1KhWDvLxwfKHT4OMB0ic-WGyIdMI-QU588di05iy3DuEzeMW_JwrpNOHvj-EsGqK7iPMnLquwP460K?purpose=fullsize" }
         ],
         H: [
-          { n: "Tây Ban Nha", c: "es" },
-          { n: "Cabo Verde", c: "cv" },
-          { n: "Ả Rập Xê Út", c: "sa" },
-          { n: "Uruguay", c: "uy" },
+            { n: "Tây Ban Nha", c: "es", api: "https://images.openai.com/static-rsc-4/nATER14_VbTkWqit1mohhK3T-vLPMWiulvX_VG-MnTYMK-kTtYI2GRKg-gSXwr2ELFxE4-Pl4_MCWLkAMNbR4UPiANFp4BPNVA5aFLQRQpgSN-aC32mJFawQyz3AkzUnY7el2wYkgPNzwqO91fxpl_44ieoURGDxmXUlBGc90vF65w_qs6Ufp_qj5kOtXdym?purpose=fullsize" }, 
+            { n: "Cabo Verde", c: "cv", api: "https://images.openai.com/static-rsc-4/eAzSLAZVPyh2aOmKEpPEEZaWXg8sGf2WOEeTrUpY6eoGtmapmtKhz3ggAuWhMUsNyQE1MQFRSRfqQULH2s8xJqpLmxwBC5rGIoS1El8ljJrK8cBCXzYtVvkkrWU0rwdAEWloTraJ3fx1q5Xsrs3VFDLQUqSfryh1cmuMfxYBUtdRQYhtfnw2fkbacKpxUkMv?purpose=fullsize" }, 
+            { n: "Ả Rập Xê Út", c: "sa", api: "https://images.openai.com/static-rsc-4/NZkNCjk8Uj5CnG8nmZp7Dxbf53rSU3v-UPfOkaqcnWVA1RBzc0tkG4wac4keVUZXHgQ71psasS0Ao7INZPC4bk8fOFN2Zw-QqNBYi-aXSt-OtWxo-DhmxWtD_JxwcdvrN2Xu3Kxlk5ZLDuDZpHqpNv7_vcLeLf7KXHkYLLJwBoTlvUFs0BscgpUweEjaJvtb?purpose=fullsize" }, 
+            { n: "Uruguay", c: "uy", api: "https://images.openai.com/static-rsc-4/zFBnz8xHttM35XF65WPLrN1v6kztsku8jwO7xRzw2qPGL_Pjq2fBUyPh10mi0VfhYOBjWXf09rc2mtYSSpd8SUgAxcoEluW1tG4CyzmkF1baBm4r4T8-x3dKcFFt_iwWPkHxO4o9pBM9tZ7txQ3QTcAhkI1WKAYDEWe3ZZl-p961KpeMIpoyylTSlk61cVvD?purpose=fullsize" }
         ],
         I: [
-          { n: "Pháp", c: "fr" },
-          { n: "Senegal", c: "sn" },
-          { n: "Iraq", c: "iq" },
-          { n: "Na Uy", c: "no" },
+            { n: "Pháp", c: "fr", api: "https://images.openai.com/static-rsc-4/GTZYhC0UKV4zeHIIHvEDfo9pD4PeO_CGMOkO9ssTe1qhgXLy3LHmlkbQpuwUy5jG5DDpMUOMVpaYX0X-lH46aCQu1_FVdP-sQuwy84Ozb4J7JAfXOQuhbo4bWUlAM6THjT9REMjKt-smjXtdQPXpiP4D2AlF0vqUb0MKmN-TewTuI0IaBc9HPZvBkrLbm0xy?purpose=fullsize" }, 
+            { n: "Senegal", c: "sn", api: "https://images.openai.com/static-rsc-4/s1B8Pa2za-R58BiJjsBoR7IwCWDL-ZFP7O45J2Lg0HLLe39HDmxqf0_mbvUn7FiLYMZXe4xjL1kEZ5uEHyXTwwKh1AC6zmECPMY9BvRORFeqv3A3gv3bbTx0IjaaskFW3KvlzKSPG7LOEjH1JvNRIGqpV_TdjMRpWaF_r9UoD-6i-vTO32QlKdwIQZ67Fi4D?purpose=fullsize" }, 
+            { n: "Iraq", c: "iq", api: "https://images.openai.com/static-rsc-4/NpWrqp_15vpdW6sPPiMRWU3Sod0WIADaGyeC70ejzgiA_80rGzD6WyO90CpOHUw_W1ptsED3wmC7moqeead7K3JFMgWup6WwMa-fsdbAPCBLwCOafrk0gApJ0GH419fX2qWrqkN5YDdJGPpxumT8fc0bqkk7n5Oivo4Jg2yjJfkGq6MIRVzkYyp-DB4IWU4M?purpose=fullsize" }, 
+            { n: "Na Uy", c: "no", api: "https://images.openai.com/static-rsc-4/8GGfhsFVSLCTfmZyuuZV9g-OzX0VkEqQrkg37LelElfiiMJboekmexvf9h6Vr6IT3QzWWv3FgV6MuHij4hpLzNWj27ajHN_z5_7VixcaghATu9DA5ZfsUfWEg8QXOFPzTO2COej8sNzuto0zgwwZVn-CIH_OLgXpgx63u86AJNRfLgIe2dO87-2CJT3fh-0i?purpose=fullsize" }
         ],
         J: [
-          { n: "Argentina", c: "ar" },
-          { n: "Algeria", c: "dz" },
-          { n: "Áo", c: "at" },
-          { n: "Jordan", c: "jo" },
+            { n: "Argentina", c: "ar", api: "https://assets.goal.com/images/v3/getty-2218847061/crop/MM5DKMBQGQ5DEOBRGU5G433XMU5DAORSGYYQ====/GettyImages-2218847061.jpg" }, 
+            { n: "Algeria", c: "dz", api: "https://images.openai.com/static-rsc-4/Di_9MmKv6K6OFwpTwlKxopd7cUB2_PsSJCGyW0YhVhvRJxDUg_xZmBHbMXReb2QmbYxq86sl-CBazKefSAc58gyPBvPrAMwF0jJNDV5AIA8Z1gUTVb_bN5HRcssicI5d9ZiAZYiGpQC9xBlNsTfRsyRX2akfU-Uuxf-hSzLfx3h_sPiFE4-ptWQJI9jdjdtS?purpose=fullsize" }, 
+            { n: "Áo", c: "at", api: "https://images.openai.com/static-rsc-4/wiWcu4BCAxTUaS8VPgTZEKSdjOp1O6uH6EBDGS4pwbWj2GSaMNm-pjS5arLHKvK7lU7R0QMUtFg7HFQ8DB1P7_vyH61tUI-edglXwGWO6ROqSBw8Q7zvHM37H0XoKx8UmUvUGGwU66hN6dHytiQ1dw8HI5SoQ0u-a-HGspBORcvSjCsiE_WvAT2Fnc67Abf_?purpose=fullsize" }, 
+            { n: "Jordan", c: "jo", api: "https://images.openai.com/static-rsc-4/Y6FYmEM7WqFdHeGFDnesMprlN9jcphZV09xyurtMNuLtxckLdoQJ6DqSQsVgYS4V_8amvUikHumtCleMf2RMlqIHIkVTQgUjYLpdIO9-LGaaCeh4IrwRKi54nJuktY_Rk3nBWRGV8I7KJfCmu0RHgTPUt_1DrpXhNWLlihzVZyFIuY4aMXMkwFV8vtX9G8pV?purpose=fullsize" }
         ],
         K: [
-          { n: "Bồ Đào Nha", c: "pt" },
-          { n: "Congo", c: "cg" },
-          { n: "Uzbekistan", c: "uz" },
-          { n: "Colombia", c: "co" },
+            { n: "Bồ Đào Nha", c: "pt", api: "https://portugoal.net/images/Selecao2021/PortugalXI-v-Denmark-Alvalade-2025.jpg" }, 
+            { n: "Congo", c: "cg", api: "https://images.openai.com/static-rsc-4/AAhL5rnqPPhqiyo_dhnm3Mv2ksgF0dtieuhdF-XCbsKndqpx6wZutvZ5gDMtvZfLEhvsHDf_qJIeud27iMHIbOMFMYajKHTJk2-M_X8z_sCxcfzwTdxX4FYxpp4VOJOOx1QCkMiRu3HM6LhWwIWp5wyGnhaYNUwyjJY3aRbdQmhAke8VrH3rJhnip19S5RW7?purpose=fullsize" }, 
+            { n: "Uzbekistan", c: "uz", api: "https://images.openai.com/static-rsc-4/5NwH6s2czowVbzv5XgqISbvil9U05dWyA6NK-WDsKgW0m6QGjQwtMeScTfEoaXblaPbfmTC0ebyRTb_FBzCg08ubnzqsvAeZqJUrRqQcJNjiHGCOkxxeI9ah_ap2x2Pr9wM1m3bGhuO4Hrcwz2-i9V4PfwPXxC9fVoQiCry1RQ5yvLQnQtTPnFPE-UPzd1uH?purpose=fullsize" }, 
+            { n: "Colombia", c: "co", api: "https://images.openai.com/static-rsc-4/UPnFg3sMFkXMeyptcqDxNRDxh21Ko9_8_k2W6NuYEe8woKZzRzMmlGVUSSuH4RaUBZ3j6lOdCzj5dw0JNzv5Ej8ZZa9j2tq9VjhCbInkIUdanmTmphoklp43LCXJWqDkmIuxT5kiGJ0pW-HZtgDdDHTNZ7hBJrYb4QKRj9CaiGyEvCdv2xKbiGYKoTAGcUJm?purpose=fullsize" }
         ],
         L: [
-          { n: "Anh", c: "gb-eng" },
-          { n: "Croatia", c: "hr" },
-          { n: "Ghana", c: "gh" },
-          { n: "Panama", c: "pa" },
-        ],
+            { n: "Anh", c: "gb-eng", api: "https://images.openai.com/static-rsc-4/C_woAJx41eysw5yVp6499A1jpmkU2cKHSn4WV9Pc0CmduuYpXgKzoqVY53EcRmXVAeH7PC-cxcgkejJQrQVCM4ZyrpVMRaMiD_4lPKi3rBnzURzx-pFda93KhxTvKchm0C3M-vqpaSJJMV-HYGKO00PIujt-qbGjPiuH6-O-r3LoNUCpgzAa_sie4ZUVfHHg?purpose=fullsize" }, 
+            { n: "Croatia", c: "hr", api: "https://images.openai.com/static-rsc-4/Z_nO2iXoF_8yT2FS_W04GRHnyswsE5Hr5zNS5PwLb2ByO210X2YeUOsGF3q36aPsOyAMlrJvHufPNHoc7EeQJiowAtUmdnVJ7GwjxBwH2CRM8cfbiXV-O7m629OFX1qTFeinm8aPV2nBNAnojw_smfe7rJ_QvrfNwdSYSTFcXoBOm0GFEQBHHufbUbSHSo9O?purpose=fullsize" }, 
+            { n: "Ghana", c: "gh", api: "https://images.openai.com/static-rsc-4/PWVksVHU44LGL4N1k-xeFuTQrYHqBO0FBvEWh4CJwzq3xR1axb1_Je4XsQGCppL0PNqFsYQJD6sLR3SRH7W_tlsZZstCpJrSBQHQPaq14Jv5vaihMOM6jU9fuiTW7a1kZkPcwini_mZbJ3-mlqMEcJqgRqDDv5uoeO45lTghmzcoUAIWcjfaHcjxxqcYl2Q0?purpose=fullsize" }, 
+            { n: "Panama", c: "pa", api: "https://images.openai.com/static-rsc-4/uhLrcfaf-m29vshRaf3cltqjkVTxiwjvLZYYrCveNdqTtlC4PcJt-a66Wzh7pBJYuIbcZaT0rcHOjarNCttupvEi0SF93kXlWgAUZpVs7Z9lnTTjo46iD32LQIKZ8BM0UchWlz2zEWoWiDk1GRAA7e8u0ZNmFbzF1unVSMIszI9Lz7vmJg9iW9ge41TQ6R6h?purpose=fullsize" }
+        ]
       };
 
       const vongBangDays = {
-        "12/06": [
-          { h: "Mexico", a: "Nam Phi", t: "02:00", g: "A" },
-          { h: "Hàn Quốc", a: "C.H Séc", t: "09:00", g: "A" },
-        ],
-        "13/06": [
-          { h: "Canada", a: "Bosnia", t: "02:00", g: "B" },
-          { h: "Mỹ", a: "Paraguay", t: "08:00", g: "D" },
-        ],
-        "14/06": [
-          { h: "Qatar", a: "Thụy Sĩ", t: "02:00", g: "B" },
-          { h: "Ma Rốc", a: "Brazil", t: "05:00", g: "C" },
-          { h: "Haiti", a: "Scotland", t: "08:00", g: "C" },
-          { h: "Úc", a: "Thổ Nhĩ Kỳ", t: "11:00", g: "D" },
-        ],
-        "15/06": [
-          { h: "Đức", a: "Curaçao", t: "00:00", g: "E" },
-          { h: "Hà Lan", a: "Nhật Bản", t: "03:00", g: "F" },
-          { h: "Bờ Biển Ngà", a: "Ecuador", t: "06:00", g: "E" },
-          { h: "Thụy Điển", a: "Tunisia", t: "09:00", g: "F" },
-          { h: "Tây Ban Nha", a: "Cabo Verde", t: "23:00", g: "H" },
-        ],
-        "16/06": [
-          { h: "Bỉ", a: "Ai Cập", t: "02:00", g: "G" },
-          { h: "Ả Rập Xê Út", a: "Uruguay", t: "05:00", g: "H" },
-          { h: "Iran", a: "New Zealand", t: "08:00", g: "G" },
-        ],
-        "17/06": [
-          { h: "Pháp", a: "Senegal", t: "02:00", g: "I" },
-          { h: "Iraq", a: "Na Uy", t: "05:00", g: "I" },
-          { h: "Argentina", a: "Algeria", t: "08:00", g: "J" },
-          { h: "Áo", a: "Jordan", t: "11:00", g: "J" },
-        ],
-        "18/06": [
-          { h: "Bồ Đào Nha", a: "Congo", t: "00:00", g: "K" },
-          { h: "Anh", a: "Croatia", t: "03:00", g: "L" },
-          { h: "Ghana", a: "Panama", t: "06:00", g: "L" },
-          { h: "Uzbekistan", a: "Colombia", t: "09:00", g: "K" },
-          { h: "C.H Séc", a: "Nam Phi", t: "23:00", g: "A" },
-        ],
-        "19/06": [
-          { h: "Thụy Sĩ", a: "Bosnia", t: "02:00", g: "B" },
-          { h: "Canada", a: "Qatar", t: "05:00", g: "B" },
-          { h: "Mexico", a: "Hàn Quốc", t: "08:00", g: "A" },
-        ],
-        "20/06": [
-          { h: "Mỹ", a: "Úc", t: "02:00", g: "D" },
-          { h: "Ma Rốc", a: "Scotland", t: "05:00", g: "C" },
-          { h: "Brazil", a: "Haiti", t: "07:30", g: "C" },
-          { h: "Thổ Nhĩ Kỳ", a: "Paraguay", t: "10:00", g: "D" },
-        ],
-        "21/06": [
-          { h: "Hà Lan", a: "Thụy Điển", t: "00:00", g: "F" },
-          { h: "Đức", a: "Bờ Biển Ngà", t: "03:00", g: "E" },
-          { h: "Ecuador", a: "Curaçao", t: "07:00", g: "E" },
-          { h: "Tunisia", a: "Nhật Bản", t: "11:00", g: "F" },
-          { h: "Tây Ban Nha", a: "Ả Rập Xê Út", t: "23:00", g: "H" },
-        ],
-        "22/06": [
-          { h: "Bỉ", a: "Iran", t: "02:00", g: "G" },
-          { h: "Uruguay", a: "Cabo Verde", t: "05:00", g: "H" },
-          { h: "New Zealand", a: "Ai Cập", t: "08:00", g: "G" },
-        ],
-        "23/06": [
-          { h: "Argentina", a: "Áo", t: "00:00", g: "J" },
-          { h: "Pháp", a: "Iraq", t: "04:00", g: "I" },
-          { h: "Na Uy", a: "Senegal", t: "07:00", g: "I" },
-          { h: "Jordan", a: "Algeria", t: "10:00", g: "J" },
-        ],
-        "24/06": [
-          { h: "Bồ Đào Nha", a: "Uzbekistan", t: "00:00", g: "K" },
-          { h: "Anh", a: "Ghana", t: "03:00", g: "L" },
-          { h: "Panama", a: "Croatia", t: "06:00", g: "L" },
-          { h: "Colombia", a: "Congo", t: "09:00", g: "K" },
-        ],
-        "25/06": [
-          { h: "Thụy Sĩ", a: "Canada", t: "02:00", g: "B" },
-          { h: "Bosnia", a: "Qatar", t: "02:00", g: "B" },
-          { h: "Scotland", a: "Brazil", t: "05:00", g: "C" },
-          { h: "Ma Rốc", a: "Haiti", t: "05:00", g: "C" },
-          { h: "C.H Séc", a: "Mexico", t: "08:00", g: "A" },
-          { h: "Nam Phi", a: "Hàn Quốc", t: "08:00", g: "A" },
-        ],
-        "26/06": [
-          { h: "Curaçao", a: "Bờ Biển Ngà", t: "03:00", g: "E" },
-          { h: "Ecuador", a: "Đức", t: "03:00", g: "E" },
-          { h: "Nhật Bản", a: "Thụy Điển", t: "06:00", g: "F" },
-          { h: "Tunisia", a: "Hà Lan", t: "06:00", g: "F" },
-          { h: "Thổ Nhĩ Kỳ", a: "Mỹ", t: "09:00", g: "D" },
-          { h: "Paraguay", a: "Úc", t: "09:00", g: "D" },
-        ],
-        "27/06": [
-          { h: "Na Uy", a: "Pháp", t: "02:00", g: "I" },
-          { h: "Senegal", a: "Iraq", t: "02:00", g: "I" },
-          { h: "Cabo Verde", a: "Ả Rập Xê Út", t: "07:00", g: "H" },
-          { h: "Uruguay", a: "Tây Ban Nha", t: "07:00", g: "H" },
-          { h: "Ai Cập", a: "Iran", t: "10:00", g: "G" },
-          { h: "New Zealand", a: "Bỉ", t: "10:00", g: "G" },
-        ],
-        "28/06": [
-          { h: "Panama", a: "Anh", t: "04:00", g: "L" },
-          { h: "Croatia", a: "Ghana", t: "04:00", g: "L" },
-          { h: "Colombia", a: "Bồ Đào Nha", t: "06:30", g: "K" },
-          { h: "Congo", a: "Uzbekistan", t: "06:30", g: "K" },
-          { h: "Algeria", a: "Áo", t: "09:00", g: "J" },
-          { h: "Jordan", a: "Argentina", t: "09:00", g: "J" },
-        ],
+        "12/06": [{ h: "Mexico", a: "Nam Phi", t: "02:00", g: "A" }, { h: "Hàn Quốc", a: "C.H Séc", t: "09:00", g: "A" }],
+        "13/06": [{ h: "Canada", a: "Bosnia", t: "02:00", g: "B" }, { h: "Mỹ", a: "Paraguay", t: "08:00", g: "D" }],
+        "14/06": [{ h: "Qatar", a: "Thụy Sĩ", t: "02:00", g: "B" }, { h: "Ma Rốc", a: "Brazil", t: "05:00", g: "C" }, { h: "Haiti", a: "Scotland", t: "08:00", g: "C" }, { h: "Úc", a: "Thổ Nhĩ Kỳ", t: "11:00", g: "D" }],
+        "15/06": [{ h: "Đức", a: "Curaçao", t: "00:00", g: "E" }, { h: "Hà Lan", a: "Nhật Bản", t: "03:00", g: "F" }, { h: "Bờ Biển Ngà", a: "Ecuador", t: "06:00", g: "E" }, { h: "Thụy Điển", a: "Tunisia", t: "09:00", g: "F" }, { h: "Tây Ban Nha", a: "Cabo Verde", t: "23:00", g: "H" }],
+        "16/06": [{ h: "Bỉ", a: "Ai Cập", t: "02:00", g: "G" }, { h: "Ả Rập Xê Út", a: "Uruguay", t: "05:00", g: "H" }, { h: "Iran", a: "New Zealand", t: "08:00", g: "G" }],
+        "17/06": [{ h: "Pháp", a: "Senegal", t: "02:00", g: "I" }, { h: "Iraq", a: "Na Uy", t: "05:00", g: "I" }, { h: "Argentina", a: "Algeria", t: "08:00", g: "J" }, { h: "Áo", a: "Jordan", t: "11:00", g: "J" }],
+        "18/06": [{ h: "Bồ Đào Nha", a: "Congo", t: "00:00", g: "K" }, { h: "Anh", a: "Croatia", t: "03:00", g: "L" }, { h: "Ghana", a: "Panama", t: "06:00", g: "L" }, { h: "Uzbekistan", a: "Colombia", t: "09:00", g: "K" }, { h: "C.H Séc", a: "Nam Phi", t: "23:00", g: "A" }],
+        "19/06": [{ h: "Thụy Sĩ", a: "Bosnia", t: "02:00", g: "B" }, { h: "Canada", a: "Qatar", t: "05:00", g: "B" }, { h: "Mexico", a: "Hàn Quốc", t: "08:00", g: "A" }],
+        "20/06": [{ h: "Mỹ", a: "Úc", t: "02:00", g: "D" }, { h: "Ma Rốc", a: "Scotland", t: "05:00", g: "C" }, { h: "Brazil", a: "Haiti", t: "07:30", g: "C" }, { h: "Thổ Nhĩ Kỳ", a: "Paraguay", t: "10:00", g: "D" }],
+        "21/06": [{ h: "Hà Lan", a: "Thụy Điển", t: "00:00", g: "F" }, { h: "Đức", a: "Bờ Biển Ngà", t: "03:00", g: "E" }, { h: "Ecuador", a: "Curaçao", t: "07:00", g: "E" }, { h: "Tunisia", a: "Nhật Bản", t: "11:00", g: "F" }, { h: "Tây Ban Nha", a: "Ả Rập Xê Út", t: "23:00", g: "H" }],
+        "22/06": [{ h: "Bỉ", a: "Iran", t: "02:00", g: "G" }, { h: "Uruguay", a: "Cabo Verde", t: "05:00", g: "H" }, { h: "New Zealand", a: "Ai Cập", t: "08:00", g: "G" }],
+        "23/06": [{ h: "Argentina", a: "Áo", t: "00:00", g: "J" }, { h: "Pháp", a: "Iraq", t: "04:00", g: "I" }, { h: "Na Uy", a: "Senegal", t: "07:00", g: "I" }, { h: "Jordan", a: "Algeria", t: "10:00", g: "J" }],
+        "24/06": [{ h: "Bồ Đào Nha", a: "Uzbekistan", t: "00:00", g: "K" }, { h: "Anh", a: "Ghana", t: "03:00", g: "L" }, { h: "Panama", a: "Croatia", t: "06:00", g: "L" }, { h: "Colombia", a: "Congo", t: "09:00", g: "K" }],
+        "25/06": [{ h: "Thụy Sĩ", a: "Canada", t: "02:00", g: "B" }, { h: "Bosnia", a: "Qatar", t: "02:00", g: "B" }, { h: "Scotland", a: "Brazil", t: "05:00", g: "C" }, { h: "Ma Rốc", a: "Haiti", t: "05:00", g: "C" }, { h: "C.H Séc", a: "Mexico", t: "08:00", g: "A" }, { h: "Nam Phi", a: "Hàn Quốc", t: "08:00", g: "A" }],
+        "26/06": [{ h: "Curaçao", a: "Bờ Biển Ngà", t: "03:00", g: "E" }, { h: "Ecuador", a: "Đức", t: "03:00", g: "E" }, { h: "Nhật Bản", a: "Thụy Điển", t: "06:00", g: "F" }, { h: "Tunisia", a: "Hà Lan", t: "06:00", g: "F" }, { h: "Thổ Nhĩ Kỳ", a: "Mỹ", t: "09:00", g: "D" }, { h: "Paraguay", a: "Úc", t: "09:00", g: "D" }],
+        "27/06": [{ h: "Na Uy", a: "Pháp", t: "02:00", g: "I" }, { h: "Senegal", a: "Iraq", t: "02:00", g: "I" }, { h: "Cabo Verde", a: "Ả Rập Xê Út", t: "07:00", g: "H" }, { h: "Uruguay", a: "Tây Ban Nha", t: "07:00", g: "H" }, { h: "Ai Cập", a: "Iran", t: "10:00", g: "G" }, { h: "New Zealand", a: "Bỉ", t: "10:00", g: "G" }],
+        "28/06": [{ h: "Panama", a: "Anh", t: "04:00", g: "L" }, { h: "Croatia", a: "Ghana", t: "04:00", g: "L" }, { h: "Colombia", a: "Bồ Đào Nha", t: "06:30", g: "K" }, { h: "Congo", a: "Uzbekistan", t: "06:30", g: "K" }, { h: "Algeria", a: "Áo", t: "09:00", g: "J" }, { h: "Jordan", a: "Argentina", t: "09:00", g: "J" }],
       };
 
       const knockoutData = {
-        "Vòng 32 đội": [
-          { t: 73, d: "29/06", g: "02:00", h: "Nhất bảng A", a: "Nhì bảng B" },
-          { t: 74, d: "30/06", g: "00:00", h: "Nhất bảng C", a: "Nhì bảng F" },
-          { t: 75, d: "30/06", g: "03:30", h: "Nhất bảng E", a: "Thứ 3 ABCDF" },
-          { t: 76, d: "30/06", g: "08:00", h: "Nhất bảng F", a: "Nhì bảng C" },
-          { t: 77, d: "01/07", g: "00:00", h: "Nhì bảng E", a: "Nhất bảng I" },
-          { t: 78, d: "01/07", g: "04:00", h: "Nhất bảng I", a: "Thứ 3 CDFGH" },
-          { t: 79, d: "01/07", g: "08:00", h: "Nhất bảng A", a: "Thứ 3 CEFHI" },
-          { t: 80, d: "01/07", g: "23:00", h: "Nhất bảng L", a: "Thứ 3 EHIJK" },
-          { t: 81, d: "02/07", g: "03:00", h: "Nhất bảng G", a: "Thứ 3 AEHIJ" },
-          { t: 82, d: "02/07", g: "07:00", h: "Nhất bảng D", a: "Thứ 3 BEFIJ" },
-          { t: 83, d: "03/07", g: "02:00", h: "Nhất bảng H", a: "Nhì bảng J" },
-          { t: 84, d: "03/07", g: "06:00", h: "Nhì bảng K", a: "Nhì bảng L" },
-          { t: 85, d: "03/07", g: "10:00", h: "Nhất bảng B", a: "Thứ 3 EFGIJ" },
-          { t: 86, d: "04/07", g: "01:00", h: "Nhì bảng D", a: "Nhì bảng G" },
-          { t: 87, d: "04/07", g: "05:00", h: "Nhất bảng J", a: "Nhì bảng H" },
-          { t: 88, d: "04/07", g: "08:30", h: "Nhất bảng K", a: "Thứ 3 DEIJL" },
-        ],
-        "Vòng 16 đội": [
-          {
-            t: 89,
-            d: "05/07",
-            g: "00:00",
-            h: "Thắng trận 73",
-            a: "Thắng trận 75",
-          },
-          {
-            t: 90,
-            d: "05/07",
-            g: "04:00",
-            h: "Thắng trận 74",
-            a: "Thắng trận 77",
-          },
-          {
-            t: 91,
-            d: "06/07",
-            g: "03:00",
-            h: "Thắng trận 76",
-            a: "Thắng trận 78",
-          },
-          {
-            t: 92,
-            d: "06/07",
-            g: "07:00",
-            h: "Thắng trận 79",
-            a: "Thắng trận 80",
-          },
-          {
-            t: 93,
-            d: "07/07",
-            g: "02:00",
-            h: "Thắng trận 83",
-            a: "Thắng trận 84",
-          },
-          {
-            t: 94,
-            d: "07/07",
-            g: "07:00",
-            h: "Thắng trận 81",
-            a: "Thắng trận 82",
-          },
-          {
-            t: 95,
-            d: "07/07",
-            g: "23:00",
-            h: "Thắng trận 86",
-            a: "Thắng trận 88",
-          },
-          {
-            t: 96,
-            d: "08/07",
-            g: "03:00",
-            h: "Thắng trận 85",
-            a: "Thắng trận 87",
-          },
-        ],
-        "Vòng Tứ Kết": [
-          {
-            t: 97,
-            d: "10/07",
-            g: "03:00",
-            h: "Thắng trận 89",
-            a: "Thắng trận 90",
-          },
-          {
-            t: 98,
-            d: "11/07",
-            g: "02:00",
-            h: "Thắng trận 93",
-            a: "Thắng trận 94",
-          },
-          {
-            t: 99,
-            d: "12/07",
-            g: "04:00",
-            h: "Thắng trận 91",
-            a: "Thắng trận 92",
-          },
-          {
-            t: 100,
-            d: "12/07",
-            g: "08:00",
-            h: "Thắng trận 95",
-            a: "Thắng trận 96",
-          },
-        ],
+        "Vòng 32 đội": [ { t: 73, d: "29/06", g: "02:00", h: "Nhất bảng A", a: "Nhì bảng B" }, { t: 74, d: "30/06", g: "00:00", h: "Nhất bảng C", a: "Nhì bảng F" }, { t: 75, d: "30/06", g: "03:30", h: "Nhất bảng E", a: "Thứ 3 ABCDF" }, { t: 76, d: "30/06", g: "08:00", h: "Nhất bảng F", a: "Nhì bảng C" }, { t: 77, d: "01/07", g: "00:00", h: "Nhì bảng E", a: "Nhất bảng I" }, { t: 78, d: "01/07", g: "04:00", h: "Nhất bảng I", a: "Thứ 3 CDFGH" }, { t: 79, d: "01/07", g: "08:00", h: "Nhất bảng A", a: "Thứ 3 CEFHI" }, { t: 80, d: "01/07", g: "23:00", h: "Nhất bảng L", a: "Thứ 3 EHIJK" }, { t: 81, d: "02/07", g: "03:00", h: "Nhất bảng G", a: "Thứ 3 AEHIJ" }, { t: 82, d: "02/07", g: "07:00", h: "Nhất bảng D", a: "Thứ 3 BEFIJ" }, { t: 83, d: "03/07", g: "02:00", h: "Nhất bảng H", a: "Nhì bảng J" }, { t: 84, d: "03/07", g: "06:00", h: "Nhì bảng K", a: "Nhì bảng L" }, { t: 85, d: "03/07", g: "10:00", h: "Nhất bảng B", a: "Thứ 3 EFGIJ" }, { t: 86, d: "04/07", g: "01:00", h: "Nhì bảng D", a: "Nhì bảng G" }, { t: 87, d: "04/07", g: "05:00", h: "Nhất bảng J", a: "Nhì bảng H" }, { t: 88, d: "04/07", g: "08:30", h: "Nhất bảng K", a: "Thứ 3 DEIJL" } ],
+        "Vòng 16 đội": [ { t: 89, d: "05/07", g: "00:00", h: "Thắng trận 73", a: "Thắng trận 75" }, { t: 90, d: "05/07", g: "04:00", h: "Thắng trận 74", a: "Thắng trận 77" }, { t: 91, d: "06/07", g: "03:00", h: "Thắng trận 76", a: "Thắng trận 78" }, { t: 92, d: "06/07", g: "07:00", h: "Thắng trận 79", a: "Thắng trận 80" }, { t: 93, d: "07/07", g: "02:00", h: "Thắng trận 83", a: "Thắng trận 84" }, { t: 94, d: "07/07", g: "07:00", h: "Thắng trận 81", a: "Thắng trận 82" }, { t: 95, d: "07/07", g: "23:00", h: "Thắng trận 86", a: "Thắng trận 88" }, { t: 96, d: "08/07", g: "03:00", h: "Thắng trận 85", a: "Thắng trận 87" } ],
+        "Vòng Tứ Kết": [ { t: 97, d: "10/07", g: "03:00", h: "Thắng trận 89", a: "Thắng trận 90" }, { t: 98, d: "11/07", g: "02:00", h: "Thắng trận 93", a: "Thắng trận 94" }, { t: 99, d: "12/07", g: "04:00", h: "Thắng trận 91", a: "Thắng trận 92" }, { t: 100, d: "12/07", g: "08:00", h: "Thắng trận 95", a: "Thắng trận 96" } ],
+        "Vòng Bán Kết": [ { t: 101, d: "15/07", g: "02:00", h: "Thắng trận 97", a: "Thắng trận 98" }, { t: 102, d: "16/07", g: "02:00", h: "Thắng trận 99", a: "Thắng trận 100" } ],
+        "Tranh Hạng Ba": [ { t: 103, d: "19/07", g: "04:00", h: "Thua trận 101", a: "Thua trận 102" } ]
       };
 
-      function toggleMenu() {
-        const sidebar = document.getElementById("sidebar");
-        const overlay = document.getElementById("overlay");
-        sidebar.classList.toggle("active");
-        overlay.style.display = sidebar.classList.contains("active")
-          ? "block"
-          : "none";
+      function toggleMenu(show) { 
+        const s = document.getElementById("sidebar"); 
+        const o = document.getElementById("overlay"); 
+        if(show) { s.classList.add("active"); o.style.display = "block"; }
+        else { s.classList.remove("active"); o.style.display = "none"; }
       }
 
       function initHomeMode() {
+        document.getElementById("top-matches-section").style.display = "block";
         document.getElementById("display-title").innerText = "Vòng Bảng";
-        const subNav = document.getElementById("sub-navigation");
-        subNav.innerHTML = "";
+        const subNav = document.getElementById("sub-navigation"); subNav.innerHTML = "";
         Object.keys(groupTeams).forEach((id) => {
-          const btn = document.createElement("button");
-          btn.className =
-            "phase-btn px-6 py-3 rounded-2xl font-black uppercase";
-          btn.innerText = "Bảng " + id;
-          btn.onclick = () => renderGroupIcons(id, btn);
-          subNav.appendChild(btn);
+          const btn = document.createElement("button"); btn.className = "phase-btn px-6 py-3 rounded-2xl font-black uppercase";
+          btn.innerText = "Bảng " + id; btn.onclick = () => renderGroupIcons(id, btn); subNav.appendChild(btn);
         });
-        renderGroupIcons("A", subNav.firstChild);
+        renderGroupIcons("A", subNav.firstChild); renderTopMatches();
+      }
+
+      function getTeamMatches(teamName) {
+        let res = [];
+        for (let day in vongBangDays) {
+          vongBangDays[day].forEach(m => { if (m.h === teamName || m.a === teamName) res.push({...m, d: day}); });
+        }
+        return res;
+      }
+
+      function openTeamPopup(teamName) {
+        let teamData = null;
+        for(let g in groupTeams) {
+            const found = groupTeams[g].find(t => t.n === teamName);
+            if(found) { teamData = found; break; }
+        }
+        if(!teamData) return;
+
+        const matches = getTeamMatches(teamName);
+        const popup = document.getElementById("team-popup");
+        const overlay = document.getElementById("overlay");
+        const content = document.getElementById("popup-content");
+
+        content.innerHTML = `
+            <div class="flex flex-col items-center">
+                <h3 class="worldcup-font text-4xl text-[#d4af37] mb-6 uppercase text-center">${teamData.n}</h3>
+                <div class="popup-img-container mb-8">
+                    <img src="${teamData.api}" class="popup-team-img" onerror="this.src='https://via.placeholder.com/600x400?text=FIFA+WORLD+CUP+2026'">
+                </div>
+                <div class="w-full">
+                    <p class="worldcup-font text-xl text-white border-b-2 border-[#d4af37]/30 pb-2 mb-6 uppercase italic tracking-widest text-center">Lịch Thi Đấu Đội Tuyển</p>
+                    <div class="grid grid-cols-1 gap-4">
+                        ${matches.map(m => `
+                            <div class="glass p-5 rounded-3xl flex justify-between items-center border border-white/5">
+                                <div class="text-left"><span class="block text-slate-400 font-bold text-xs uppercase">${m.d}</span><span class="text-white font-black text-lg uppercase tracking-tighter">vs ${m.h === teamName ? m.a : m.h}</span></div>
+                                <div class="text-right"><span class="worldcup-font text-[#00f2ff] text-2xl">${m.t}</span><span class="block text-[9px] text-[#d4af37] font-bold uppercase tracking-widest">Bảng ${m.g}</span></div>
+                            </div>
+                        `).join("")}
+                    </div>
+                </div>
+            </div>
+        `;
+        popup.style.display = "block";
+        overlay.style.display = "block";
+      }
+
+      function closePopup() {
+        document.getElementById("team-popup").style.display = "none";
+        document.getElementById("overlay").style.display = "none";
       }
 
       function renderGroupIcons(id, btn) {
-        document
-          .querySelectorAll(".phase-btn")
-          .forEach((b) => b.classList.remove("active"));
-        if (btn) btn.classList.add("active");
+        document.querySelectorAll(".phase-btn").forEach(b => b.classList.remove("active")); if (btn) btn.classList.add("active");
         const teams = groupTeams[id];
         document.getElementById("main-display").innerHTML = `
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-12 w-full max-w-6xl mx-auto">
-                ${teams
-                  .map(
-                    (t) => `
-                    <div class="team-circle rounded-[3rem] glass" onclick="showMatchesByTeam('${t.n}')">
-                        <img src="https://flagcdn.com/w320/${t.c}.png" class="w-24 h-24 rounded-full object-cover mb-6 border-4 border-white/20 shadow-2xl pointer-events-none">
-                        <span class="font-black text-2xl uppercase text-white text-center tracking-tighter">${t.n}</span>
-                        <span class="text-[10px] text-[#D4AF37] mt-2 font-bold uppercase tracking-widest">Xem lịch đấu</span>
-                    </div>`
-                  )
-                  .join("")}
-            </div>`;
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 w-full max-w-7xl">
+            ${teams.map(t => {
+              const ms = getTeamMatches(t.n);
+              return `
+                <div class="team-circle glass" onclick="openTeamPopup('${t.n}')">
+                  <img src="https://flagcdn.com/w320/${t.c}.png" class="w-24 h-24 rounded-full object-cover mb-4 border-2 border-white/20 shadow-2xl">
+                  <span class="font-black text-3xl uppercase text-white text-center tracking-tighter">${t.n}</span>
+                  <div class="match-mini">
+                    ${ms.map(m => `
+                      <div class="match-mini-item">
+                        <div class="match-mini-header"><span>${m.d}</span><span class="match-mini-time">${m.t}</span></div>
+                        <div class="match-mini-vs">vs ${m.h === t.n ? m.a : m.h}</div>
+                      </div>`).join("")}
+                  </div>
+                  <span class="mt-auto text-[10px] text-[#d4af37] font-bold uppercase tracking-[0.2em] opacity-60">Xem Đội Tuyển</span>
+                </div>`;
+            }).join("")}
+          </div>`;
       }
 
-      function showMatchesByTeam(teamName) {
-        document.getElementById("display-title").innerText =
-          "Lịch Thi Đấu: " + teamName;
-        document
-          .querySelectorAll(".phase-btn")
-          .forEach((b) => b.classList.remove("active"));
-        let matchesFound = [];
-        Object.keys(vongBangDays).forEach((day) => {
-          vongBangDays[day].forEach((m) => {
-            if (m.h === teamName || m.a === teamName) {
-              matchesFound.push({ ...m, date: day });
-            }
-          });
-        });
-        const displayArea = document.getElementById("main-display");
-        if (matchesFound.length === 0) {
-          displayArea.innerHTML = `<p class="text-slate-400 text-xl font-bold uppercase">Chưa cập nhật trận đấu cho đội này.</p>`;
-          return;
-        }
-        displayArea.innerHTML = `
-            <div class="space-y-6 w-full max-w-5xl">
-                <button onclick="initHomeMode()" class="mb-4 text-[#D4AF37] hover:text-white font-black text-sm uppercase flex items-center gap-2">
-                   <i class="fa-solid fa-arrow-left"></i> Quay lại các bảng
-                </button>
-                ${matchesFound
-                  .map(
-                    (m) => `
-                    <div class="glass p-8 rounded-[3rem] border border-white/10 flex items-center justify-between hover:bg-white/5 transition-all">
-                        <div class="w-32 text-left">
-                            <span class="block text-[#D4AF37] font-black text-4xl worldcup-font">${
-                              m.t
-                            }</span>
-                            <span class="text-xs text-white font-bold uppercase tracking-widest">${
-                              m.date
-                            }</span>
-                            <span class="block text-[10px] text-slate-500 font-bold uppercase">Bảng ${
-                              m.g
-                            }</span>
-                        </div>
-                        <div class="flex-1 text-center font-black uppercase text-2xl text-white tracking-tight px-4">
-                            <span class="${
-                              m.h === teamName ? "text-[#D4AF37]" : ""
-                            }">${m.h}</span>
-                            <span class="px-8 text-[#00f2ff] italic opacity-40 text-lg">vs</span>
-                            <span class="${
-                              m.a === teamName ? "text-[#D4AF37]" : ""
-                            }">${m.a}</span>
-                        </div>
-                    </div>`
-                  )
-                  .join("")}
-            </div>`;
-        displayArea.scrollIntoView({ behavior: "smooth", block: "start" });
+      function renderTopMatches() {
+        const matches = [
+            { d: "12/06", g: "02:00", b: "A", h: "Mexico", a: "Nam Phi", hc: "mx", ac: "za" },
+            { d: "12/06", g: "09:00", b: "A", h: "Hàn Quốc", a: "C.H Séc", hc: "kr", ac: "cz" },
+            { d: "13/06", g: "02:00", b: "B", h: "Canada", a: "Bosnia", hc: "ca", ac: "ba" },
+            { d: "13/06", g: "08:00", b: "D", h: "Mỹ", a: "Paraguay", hc: "us", ac: "py" }
+        ];
+        document.getElementById("recent-grid").innerHTML = matches.map(m => `
+          <div class="glass p-5 rounded-3xl border-l-4 border-l-[#D4AF37] hover:bg-white/5 transition-all">
+            <div class="flex justify-between items-center mb-3"><span class="text-[12px] font-bold text-slate-500 uppercase">Bảng ${m.b} • ${m.d}</span><span class="text-[12px] font-black text-[#D4AF37] bg-[#D4AF37]/10 px-2 py-0.5 rounded-full font-goldman">${m.g}</span></div>
+            <div class="flex flex-col gap-2">
+              <div class="flex items-center gap-3"><img src="https://flagcdn.com/w40/${m.hc}.png" class="w-6 h-4"><span class="text-lg font-black uppercase text-white">${m.h}</span></div>
+              <div class="flex items-center gap-3"><img src="https://flagcdn.com/w40/${m.ac}.png" class="w-6 h-4"><span class="text-lg font-black uppercase text-white">${m.a}</span></div>
+            </div>
+          </div>`).join("");
       }
 
-      function switchToDayMode() {
-        toggleMenu();
-        document.getElementById("display-title").innerText =
-          "Lịch Thi Đấu Theo Ngày";
-        const subNav = document.getElementById("sub-navigation");
-        subNav.innerHTML = "";
-        Object.keys(vongBangDays).forEach((day) => {
-          const btn = document.createElement("button");
-          btn.className =
-            "phase-btn px-6 py-3 rounded-2xl font-black uppercase";
-          btn.innerText = day;
-          btn.onclick = () => renderVongBangDay(day, btn);
-          subNav.appendChild(btn);
-        });
-        renderVongBangDay("12/06", subNav.firstChild);
-      }
-
-      function renderVongBangDay(day, btn) {
-        document
-          .querySelectorAll(".phase-btn")
-          .forEach((b) => b.classList.remove("active"));
-        if (btn) btn.classList.add("active");
-        const matches = vongBangDays[day];
-        document.getElementById("main-display").innerHTML = `
-            <div class="space-y-6 w-full max-w-5xl">
-                ${matches
-                  .map(
-                    (m) => `
-                    <div class="glass p-8 rounded-[3rem] border border-white/10 flex items-center justify-between hover:bg-white/5 transition-all">
-                        <div class="w-32 text-left"><span class="block text-[#D4AF37] font-black text-4xl worldcup-font">${m.t}</span><span class="text-xs text-slate-500 font-bold uppercase tracking-widest">Bảng ${m.g}</span></div>
-                        <div class="flex-1 text-center font-black uppercase text-2xl text-white tracking-tight px-4">
-                            <span>${m.h}</span><span class="px-8 text-[#00f2ff] italic opacity-40 text-lg">vs</span><span>${m.a}</span>
-                        </div>
-                    </div>`
-                  )
-                  .join("")}
-            </div>`;
-      }
-
-      function renderKnockout(phase) {
-        toggleMenu();
-        document.getElementById("display-title").innerText = phase;
-        document.getElementById("sub-navigation").innerHTML = "";
-        const matches = knockoutData[phase] || [];
-        document.getElementById("main-display").innerHTML = `
-            <div class="space-y-6 w-full max-w-5xl">
-                ${matches
-                  .map(
-                    (m) => `
-                    <div class="glass p-8 rounded-[3rem] flex items-center justify-between">
-                        <div class="w-32 text-left"><span class="block text-[#D4AF37] font-black text-4xl worldcup-font">#${m.t}</span><span class="text-xs text-slate-500 font-bold uppercase">${m.d}</span></div>
-                        <div class="flex-1 text-center font-black uppercase text-2xl text-white"><span>${m.h}</span><span class="px-6 text-[#00f2ff] italic opacity-30 text-lg">vs</span><span>${m.a}</span></div>
-                        <div class="w-32 text-right font-black text-[#00f2ff] text-3xl">${m.g}</div>
-                    </div>`
-                  )
-                  .join("")}
-            </div>`;
-      }
-
-      function triggerFinal() {
-        toggleMenu();
-        document.getElementById("display-title").innerText = "Chung Kết";
-        document.getElementById("sub-navigation").innerHTML = "";
-        confetti({
-          particleCount: 300,
-          spread: 120,
-          origin: { y: 0.6 },
-          colors: ["#ffffff", "#D4AF37", "#00f2ff"],
-        });
-        document.getElementById("main-display").innerHTML = `
-            <div class="flex flex-col items-center justify-center py-10 w-full">
-                <div class="glass p-16 rounded-[5rem] border-2 border-[#D4AF37]/50 w-full max-w-3xl text-center shadow-[0_0_50px_rgba(212,175,55,0.2)]">
-                    <span class="block text-[#D4AF37] font-black text-6xl worldcup-font mb-4">#104</span>
-                    <span class="text-xl text-slate-400 font-bold block mb-12 tracking-[0.4em]">20 THÁNG 7, 2026</span>
-                    <div class="flex items-center justify-center gap-10 mb-10">
-                        <span class="text-4xl font-black text-white uppercase">WINNER 101</span>
-                        <span class="text-[#D4AF37] worldcup-font text-6xl italic">VS</span>
-                        <span class="text-4xl font-black text-white uppercase">WINNER 102</span>
-                    </div>
-                    <p class="text-[#00f2ff] font-black text-7xl worldcup-font tracking-tighter">02:00</p>
-                </div>
-            </div>`;
-      }
-
+      function switchToDayMode() { toggleMenu(false); document.getElementById("top-matches-section").style.display = "none"; document.getElementById("display-title").innerText = "Lịch Theo Ngày"; const subNav = document.getElementById("sub-navigation"); subNav.innerHTML = ""; Object.keys(vongBangDays).forEach(day => { const btn = document.createElement("button"); btn.className = "phase-btn px-4 py-2 rounded-xl uppercase"; btn.innerText = day; btn.onclick = () => renderVongBangDay(day, btn); subNav.appendChild(btn); }); renderVongBangDay("12/06", subNav.firstChild); }
+      function renderVongBangDay(day, btn) { document.querySelectorAll(".phase-btn").forEach(b => b.classList.remove("active")); if (btn) btn.classList.add("active"); const matches = vongBangDays[day]; document.getElementById("main-display").innerHTML = `<div class="space-y-6 w-full max-w-5xl">${matches.map(m => `<div class="glass p-8 rounded-[3rem] border border-white/10 flex items-center justify-between hover:bg-white/5 transition-all"><div class="w-40 text-left"><span class="block text-[#D4AF37] font-black text-5xl worldcup-font">${m.t}</span><span class="text-sm text-slate-500 font-bold uppercase tracking-widest">Bảng ${m.g}</span></div><div class="flex-1 text-center font-black uppercase text-3xl text-white"><span>${m.h}</span><span class="px-8 text-[#00f2ff] italic opacity-40 text-xl">vs</span><span>${m.a}</span></div></div>`).join("")}</div>`; }
+      function renderKnockout(phase) { toggleMenu(false); document.getElementById("top-matches-section").style.display = "none"; document.getElementById("display-title").innerText = phase; document.getElementById("sub-navigation").innerHTML = ""; const ms = knockoutData[phase] || []; document.getElementById("main-display").innerHTML = `<div class="space-y-6 w-full max-w-5xl">${ms.map(m => `<div class="glass p-8 rounded-[3rem] flex items-center justify-between"><div class="w-40 text-left"><span class="block text-[#D4AF37] font-black text-5xl worldcup-font">#${m.t}</span><span class="text-sm text-slate-500 font-bold uppercase">${m.d}</span></div><div class="flex-1 text-center font-black uppercase text-3xl text-white"><span>${m.h}</span><span class="px-6 text-[#00f2ff] italic opacity-30 text-xl">vs</span><span>${m.a}</span></div><div class="w-40 text-right font-black text-[#00f2ff] text-5xl font-goldman">${m.g}</div></div>`).join("")}</div>`; }
+      function triggerFinal() { toggleMenu(false); document.getElementById("top-matches-section").style.display = "none"; document.getElementById("display-title").innerText = "Chung Kết"; document.getElementById("sub-navigation").innerHTML = ""; confetti({ particleCount: 300, spread: 120, origin: { y: 0.6 }, colors: ["#ffffff", "#D4AF37", "#00f2ff"] }); document.getElementById("main-display").innerHTML = `<div class="flex flex-col items-center justify-center py-10 w-full"><div class="glass p-16 rounded-[5rem] border-2 border-[#D4AF37]/50 w-full max-w-4xl text-center shadow-[0_0_50px_rgba(212,175,55,0.2)]"><span class="block text-[#D4AF37] font-black text-7xl worldcup-font mb-4">#104</span><span class="text-2xl text-slate-400 font-bold block mb-12 tracking-[0.4em]">20 THÁNG 7, 2026</span><div class="flex items-center justify-center gap-10 mb-10"><span class="text-5xl font-black text-white uppercase">WINNER 101</span><span class="text-[#D4AF37] worldcup-font text-7xl italic">VS</span><span class="text-5xl font-black text-white uppercase">WINNER 102</span></div><p class="text-[#00f2ff] font-black text-8xl worldcup-font tracking-tighter">02:00</p></div></div>`; }
+      
       function updateCountdown() {
-        const target = new Date("June 11, 2026 00:00:00").getTime();
-        const now = new Date().getTime();
-        const diff = target - now;
-        const d = Math.floor(diff / (1000 * 60 * 60 * 24));
-        const h = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-        const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-        const s = Math.floor((diff % (1000 * 60)) / 1000);
-        document.getElementById("days").innerText =
-          d < 10 ? "0" + Math.max(0, d) : d;
-        document.getElementById("hours").innerText =
-          h < 10 ? "0" + Math.max(0, h) : h;
-        document.getElementById("minutes").innerText =
-          m < 10 ? "0" + Math.max(0, m) : m;
-        document.getElementById("seconds").innerText =
-          s < 10 ? "0" + Math.max(0, s) : s;
+        const target = new Date("June 11, 2026 00:00:00").getTime(); const now = new Date().getTime(); const diff = target - now;
+        const d = Math.floor(diff / (1000 * 60 * 60 * 24)); const h = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)); const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60)); const s = Math.floor((diff % (1000 * 60)) / 1000);
+        document.getElementById("days").innerText = d < 10 ? "0" + Math.max(0, d) : d; document.getElementById("hours").innerText = h < 10 ? "0" + Math.max(0, h) : h; document.getElementById("minutes").innerText = m < 10 ? "0" + Math.max(0, m) : m; document.getElementById("seconds").innerText = s < 10 ? "0" + Math.max(0, s) : s;
       }
-      setInterval(updateCountdown, 1000);
-      updateCountdown();
-
-      const skyConfetti = () => {
-        confetti({
-          particleCount: 1,
-          startVelocity: 0,
-          gravity: 0.4,
-          origin: { x: Math.random(), y: -0.1 },
-          colors: ["#ffffff", "#D4AF37", "#00f2ff"],
-        });
-        requestAnimationFrame(skyConfetti);
-      };
-      skyConfetti();
-
-      initHomeMode();
+      setInterval(updateCountdown, 1000); updateCountdown();
+      const skyConfetti = () => { confetti({ particleCount: 1, startVelocity: 0, gravity: 0.4, origin: { x: Math.random(), y: -0.1 }, colors: ["#ffffff", "#D4AF37", "#00f2ff"] }); requestAnimationFrame(skyConfetti); };
+      skyConfetti(); initHomeMode();
     </script>
   </body>
 </html>
