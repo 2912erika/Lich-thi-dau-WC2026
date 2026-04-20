@@ -137,12 +137,23 @@
         font-size: 14px;
         font-weight: 700;
         white-space: nowrap;
+        margin-bottom: 8px;
       }
       .phase-btn.active {
         background: #d4af37 !important;
         color: #001f3f !important;
         font-weight: 900;
         transform: scale(1.05);
+      }
+
+      /* Cập nhật sub-navigation để chống tràn trên PC */
+      #sub-navigation {
+        display: flex;
+        flex-wrap: wrap; /* Cho phép tự xuống dòng */
+        justify-content: center; /* Căn giữa các nút */
+        gap: 10px;
+        max-width: 100%;
+        margin: 0 auto;
       }
 
       .match-mini {
@@ -369,10 +380,7 @@
         >
           Vòng Bảng
         </h2>
-        <div
-          id="sub-navigation"
-          class="flex flex-nowrap justify-start md:justify-center gap-3 px-2 pb-6 overflow-x-auto no-scrollbar"
-        ></div>
+        <div id="sub-navigation"></div>
       </div>
       <div
         id="main-display"
@@ -1117,7 +1125,6 @@
         renderVongBangDay("12/06", subNav.firstChild);
       }
 
-      // FIX LỖI TRÀN CHỮ TRÊN MOBILE TRONG VÒNG BẢNG
       function renderVongBangDay(day, btn) {
         document
           .querySelectorAll(".phase-btn")
@@ -1145,7 +1152,6 @@
           </div>`;
       }
 
-      // FIX LỖI TRÀN CHỮ TRÊN MOBILE TRONG KNOCKOUT
       function renderKnockout(phase) {
         toggleMenu(false);
         document.getElementById("top-matches-section").style.display = "none";
