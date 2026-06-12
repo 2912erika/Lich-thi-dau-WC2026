@@ -146,11 +146,10 @@
         transform: scale(1.05);
       }
 
-      /* Cập nhật sub-navigation để chống tràn trên PC */
       #sub-navigation {
         display: flex;
-        flex-wrap: wrap; /* Cho phép tự xuống dòng */
-        justify-content: center; /* Căn giữa các nút */
+        flex-wrap: wrap;
+        justify-content: center;
         gap: 10px;
         max-width: 100%;
         margin: 0 auto;
@@ -184,6 +183,69 @@
         color: #d4af37;
         font-family: "Goldman";
         font-weight: 700;
+      }
+      .match-mini-score {
+        color: #00f2ff;
+        font-family: "Goldman";
+        font-weight: 700;
+      }
+
+      /* ===== LIVE ===== */
+      @keyframes live-pulse {
+        0%,
+        100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.35;
+        }
+      }
+      .live-dot {
+        display: inline-block;
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: #ff3b5c;
+        animation: live-pulse 1.2s infinite;
+        margin-right: 6px;
+      }
+      .live-badge {
+        display: inline-flex;
+        align-items: center;
+        background: rgba(255, 59, 92, 0.15);
+        border: 1px solid rgba(255, 59, 92, 0.6);
+        color: #ff8aa0;
+        font-size: 10px;
+        font-weight: 900;
+        letter-spacing: 0.15em;
+        padding: 2px 10px;
+        border-radius: 999px;
+        text-transform: uppercase;
+      }
+      .ft-badge {
+        display: inline-flex;
+        align-items: center;
+        background: rgba(0, 242, 255, 0.1);
+        border: 1px solid rgba(0, 242, 255, 0.4);
+        color: #00f2ff;
+        font-size: 10px;
+        font-weight: 900;
+        letter-spacing: 0.15em;
+        padding: 2px 10px;
+        border-radius: 999px;
+        text-transform: uppercase;
+      }
+      .score-big {
+        font-family: "Goldman", cursive;
+        color: #00f2ff;
+        font-weight: 700;
+      }
+      #live-status {
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+        color: #64748b;
       }
 
       /* Popup Team Detail */
@@ -297,58 +359,31 @@
         FIFA WORLD <span class="text-[#D4AF37]">CUP 2026</span>
       </h1>
 
+      <!-- ===== LIVE & KẾT QUẢ ===== -->
       <div
-        class="flex flex-wrap justify-center gap-2 md:gap-5 mb-12"
-        id="countdown"
+        class="w-full max-w-6xl px-2 mb-16"
+        id="live-section"
+        style="display: none"
       >
-        <div
-          class="glass px-3 py-3 md:px-6 rounded-2xl min-w-[70px] md:min-w-[100px] text-center"
-        >
-          <span
-            id="days"
-            class="block text-2xl md:text-5xl font-black worldcup-font text-[#D4AF37]"
-            >00</span
-          ><span
-            class="text-[10px] md:text-[12px] font-bold text-slate-400 uppercase"
-            >Ngày</span
+        <div class="flex items-center gap-4 mb-2">
+          <div
+            class="h-px flex-1 bg-gradient-to-r from-transparent via-[#ff3b5c]/50 to-transparent"
+          ></div>
+          <h3
+            class="worldcup-font text-lg md:text-2xl text-white uppercase italic tracking-widest"
           >
+            <span class="live-dot"></span>Trực Tiếp
+            <span class="text-[#D4AF37]">&amp; Kết Quả</span>
+          </h3>
+          <div
+            class="h-px flex-1 bg-gradient-to-r from-transparent via-[#ff3b5c]/50 to-transparent"
+          ></div>
         </div>
+        <p id="live-status" class="text-center mb-6"></p>
         <div
-          class="glass px-3 py-3 md:px-6 rounded-2xl min-w-[70px] md:min-w-[100px] text-center"
-        >
-          <span
-            id="hours"
-            class="block text-2xl md:text-5xl font-black worldcup-font text-white"
-            >00</span
-          ><span
-            class="text-[10px] md:text-[12px] font-bold text-slate-400 uppercase"
-            >Giờ</span
-          >
-        </div>
-        <div
-          class="glass px-3 py-3 md:px-6 rounded-2xl min-w-[70px] md:min-w-[100px] text-center"
-        >
-          <span
-            id="minutes"
-            class="block text-2xl md:text-5xl font-black worldcup-font text-white opacity-80"
-            >00</span
-          ><span
-            class="text-[10px] md:text-[12px] font-bold text-slate-400 uppercase"
-            >Phút</span
-          >
-        </div>
-        <div
-          class="glass px-3 py-3 md:px-6 rounded-2xl min-w-[70px] md:min-w-[100px] text-center border-[#00f2ff]/30"
-        >
-          <span
-            id="seconds"
-            class="block text-2xl md:text-5xl font-black worldcup-font text-[#00f2ff]"
-            >00</span
-          ><span
-            class="text-[10px] md:text-[12px] font-bold text-[#00f2ff]/60 uppercase"
-            >Giây</span
-          >
-        </div>
+          class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"
+          id="live-grid"
+        ></div>
       </div>
 
       <div class="w-full max-w-6xl px-2 mb-16" id="top-matches-section">
@@ -401,6 +436,9 @@
     </div>
 
     <script>
+      /* =========================================================
+         DỮ LIỆU TĨNH — lịch thi đấu, giờ Việt Nam (UTC+7)
+         ========================================================= */
       const groupTeams = {
         A: [
           {
@@ -630,7 +668,7 @@
           },
           {
             n: "Congo",
-            c: "cg",
+            c: "cd",
             api: "https://images.openai.com/static-rsc-4/AAhL5rnqPPhqiyo_dhnm3Mv2ksgF0dtieuhdF-XCbsKndqpx6wZutvZ5gDMtvZfLEhvsHDf_qJIeud27iMHIbOMFMYajKHTJk2-M_X8z_sCxcfzwTdxX4FYxpp4VOJOOx1QCkMiRu3HM6LhWwIWp5wyGnhaYNUwyjJY3aRbdQmhAke8VrH3rJhnip19S5RW7?purpose=fullsize",
           },
           {
@@ -668,6 +706,7 @@
         ],
       };
 
+      // Lịch vòng bảng — giờ Việt Nam (UTC+7)
       const vongBangDays = {
         "12/06": [
           { h: "Mexico", a: "Nam Phi", t: "02:00", g: "A" },
@@ -911,6 +950,325 @@
         ],
       };
 
+      /* =========================================================
+         LIVE — Tỉ số trực tiếp
+         Nguồn 1 (ưu tiên): football-data.org QUA Cloudflare Worker
+           -> dán URL Worker của bạn vào SCORES_PROXY_URL bên dưới.
+              Token football-data.org nằm TRONG Worker, không nằm
+              trong file này (GitHub Pages là public, không được
+              để lộ token!).
+         Nguồn 2 (dự phòng): API công khai của FIFA, không cần key.
+         API lỗi cả 2 -> trang vẫn hiện lịch tĩnh bình thường.
+         ========================================================= */
+      const SCORES_PROXY_URL = ""; // <-- dán URL Cloudflare Worker vào đây, ví dụ: "https://wc26-scores.tenban.workers.dev"
+
+      // Mã FIFA (3 chữ) -> tên tiếng Việt dùng trong lịch
+      const FIFA_VI = {
+        MEX: "Mexico",
+        RSA: "Nam Phi",
+        KOR: "Hàn Quốc",
+        CZE: "C.H Séc",
+        CAN: "Canada",
+        BIH: "Bosnia",
+        QAT: "Qatar",
+        SUI: "Thụy Sĩ",
+        BRA: "Brazil",
+        MAR: "Ma Rốc",
+        HAI: "Haiti",
+        SCO: "Scotland",
+        USA: "Mỹ",
+        PAR: "Paraguay",
+        AUS: "Úc",
+        TUR: "Thổ Nhĩ Kỳ",
+        GER: "Đức",
+        CUW: "Curaçao",
+        CIV: "Bờ Biển Ngà",
+        ECU: "Ecuador",
+        NED: "Hà Lan",
+        JPN: "Nhật Bản",
+        SWE: "Thụy Điển",
+        TUN: "Tunisia",
+        BEL: "Bỉ",
+        EGY: "Ai Cập",
+        IRN: "Iran",
+        NZL: "New Zealand",
+        ESP: "Tây Ban Nha",
+        CPV: "Cabo Verde",
+        KSA: "Ả Rập Xê Út",
+        URU: "Uruguay",
+        FRA: "Pháp",
+        SEN: "Senegal",
+        IRQ: "Iraq",
+        NOR: "Na Uy",
+        ARG: "Argentina",
+        ALG: "Algeria",
+        AUT: "Áo",
+        JOR: "Jordan",
+        POR: "Bồ Đào Nha",
+        COD: "Congo",
+        UZB: "Uzbekistan",
+        COL: "Colombia",
+        ENG: "Anh",
+        CRO: "Croatia",
+        GHA: "Ghana",
+        PAN: "Panama",
+      };
+
+      // Tên tiếng Việt -> mã cờ (flagcdn) lấy từ groupTeams
+      const FLAG_BY_NAME = {};
+      Object.values(groupTeams).forEach((arr) =>
+        arr.forEach((t) => (FLAG_BY_NAME[t.n] = t.c))
+      );
+
+      const FIFA_API = "https://api.fifa.com/api/v3";
+      const WC_COMPETITION = "17"; // FIFA World Cup
+      let liveMatches = []; // dữ liệu đã chuẩn hoá
+      let scoreMap = {}; // key "Đội A|Đội B" (theo thứ tự alphabet) -> match
+      let lastSync = null;
+      let apiOk = false;
+
+      function pairKey(a, b) {
+        return [a, b].sort().join("|");
+      }
+
+      function teamVi(side) {
+        if (!side) return null;
+        const code = side.IdCountry || side.Abbreviation || "";
+        return (
+          FIFA_VI[code] ||
+          (side.TeamName && side.TeamName[0] && side.TeamName[0].Description) ||
+          side.ShortClubName ||
+          code ||
+          null
+        );
+      }
+
+      function normalizeMatch(m) {
+        const home = teamVi(m.Home);
+        const away = teamVi(m.Away);
+        if (!home || !away) return null;
+        // MatchStatus của FIFA: 0 = kết thúc, 3 = đang đá, 1 = chưa đá
+        const st = m.MatchStatus;
+        return {
+          home,
+          away,
+          hs: m.Home && m.Home.Score != null ? m.Home.Score : null,
+          as: m.Away && m.Away.Score != null ? m.Away.Score : null,
+          hp: m.HomeTeamPenaltyScore != null ? m.HomeTeamPenaltyScore : null,
+          ap: m.AwayTeamPenaltyScore != null ? m.AwayTeamPenaltyScore : null,
+          status: st === 3 ? "live" : st === 0 ? "ft" : "pre",
+          minute: m.MatchTime || "",
+          dateUtc: m.Date ? new Date(m.Date) : null,
+        };
+      }
+
+      function vnTimeStr(date) {
+        if (!date) return "";
+        return date.toLocaleString("vi-VN", {
+          timeZone: "Asia/Ho_Chi_Minh",
+          hour: "2-digit",
+          minute: "2-digit",
+          day: "2-digit",
+          month: "2-digit",
+        });
+      }
+
+      async function fetchJson(url) {
+        const r = await fetch(url, { headers: { Accept: "application/json" } });
+        if (!r.ok) throw new Error("HTTP " + r.status);
+        return r.json();
+      }
+
+      async function syncLive() {
+        try {
+          // 1) Toàn bộ trận World Cup trong khung thời gian giải
+          const cal = await fetchJson(
+            `${FIFA_API}/calendar/matches?idCompetition=${WC_COMPETITION}` +
+              `&from=2026-06-10T00:00:00Z&to=2026-07-20T23:59:59Z` +
+              `&language=en&count=500`
+          );
+          let results = (cal && cal.Results) || [];
+
+          // 2) Trận đang live (cập nhật phút + tỉ số nhanh hơn)
+          try {
+            const live = await fetchJson(
+              `${FIFA_API}/live/football/now?language=en`
+            );
+            const liveWc = ((live && live.Results) || []).filter(
+              (m) => String(m.IdCompetition) === WC_COMPETITION
+            );
+            // ghi đè trận trùng nhau bằng dữ liệu live
+            liveWc.forEach((lm) => {
+              const i = results.findIndex((rm) => rm.IdMatch === lm.IdMatch);
+              if (i >= 0) results[i] = lm;
+              else results.push(lm);
+            });
+          } catch (e) {
+            /* live endpoint lỗi thì vẫn dùng calendar */
+          }
+
+          liveMatches = results.map(normalizeMatch).filter(Boolean);
+          scoreMap = {};
+          liveMatches.forEach((m) => {
+            scoreMap[pairKey(m.home, m.away)] = m;
+          });
+          apiOk = true;
+          lastSync = new Date();
+        } catch (e) {
+          apiOk = false;
+          console.warn("Không lấy được dữ liệu live:", e);
+        }
+        renderLiveSection();
+        refreshActiveView();
+      }
+
+      // Tra tỉ số cho 1 cặp đấu trong lịch tĩnh
+      function getScore(h, a) {
+        const m = scoreMap[pairKey(h, a)];
+        if (!m || m.status === "pre" || m.hs == null) return null;
+        const flip = m.home !== h; // API đảo chủ/khách so với lịch tĩnh
+        return {
+          hs: flip ? m.as : m.hs,
+          as: flip ? m.hs : m.as,
+          hp: flip ? m.ap : m.hp,
+          ap: flip ? m.hp : m.ap,
+          status: m.status,
+          minute: m.minute,
+        };
+      }
+
+      // Chuỗi hiển thị ở giữa thay cho "vs"
+      function centerHtml(h, a, fallbackHtml) {
+        const s = getScore(h, a);
+        if (!s) return fallbackHtml;
+        const pen =
+          s.hp != null && s.ap != null && (s.hp > 0 || s.ap > 0)
+            ? `<span class="text-xs text-slate-400 font-bold"> (pen ${s.hp}-${s.ap})</span>`
+            : "";
+        const badge =
+          s.status === "live"
+            ? `<span class="live-badge ml-2"><span class="live-dot"></span>${
+                s.minute || "LIVE"
+              }</span>`
+            : `<span class="ft-badge ml-2">FT</span>`;
+        return `<span class="score-big">${s.hs} - ${s.as}</span>${pen}${badge}`;
+      }
+
+      function renderLiveSection() {
+        const section = document.getElementById("live-section");
+        const grid = document.getElementById("live-grid");
+        const status = document.getElementById("live-status");
+
+        if (!apiOk) {
+          section.style.display = "none";
+          return;
+        }
+
+        const now = Date.now();
+        const playing = liveMatches.filter((m) => m.status === "live");
+        const finished = liveMatches
+          .filter(
+            (m) =>
+              m.status === "ft" &&
+              m.dateUtc &&
+              now - m.dateUtc.getTime() < 1000 * 60 * 60 * 48 // 48 giờ gần nhất
+          )
+          .sort((a, b) => b.dateUtc - a.dateUtc)
+          .slice(0, 6);
+
+        const show = [...playing, ...finished];
+        if (!show.length) {
+          section.style.display = "none";
+          return;
+        }
+        section.style.display = "block";
+        status.innerText =
+          lastSync.toLocaleTimeString("vi-VN", {
+            timeZone: "Asia/Ho_Chi_Minh",
+            hour: "2-digit",
+            minute: "2-digit",
+          }) + " (UTC+7)";
+
+        grid.innerHTML = show
+          .map((m) => {
+            const hc = FLAG_BY_NAME[m.home];
+            const ac = FLAG_BY_NAME[m.away];
+            const pen =
+              m.hp != null && m.ap != null && (m.hp > 0 || m.ap > 0)
+                ? `<span class="text-[11px] text-slate-400 font-bold">pen ${m.hp}-${m.ap}</span>`
+                : "";
+            const badge =
+              m.status === "live"
+                ? `<span class="live-badge"><span class="live-dot"></span>${
+                    m.minute || "LIVE"
+                  }</span>`
+                : `<span class="ft-badge">FT</span>`;
+            return `
+            <div class="glass p-5 rounded-3xl border-l-4 ${
+              m.status === "live" ? "border-l-[#ff3b5c]" : "border-l-[#00f2ff]"
+            } hover:bg-white/5 transition-all">
+              <div class="flex justify-between items-center mb-3">
+                <span class="text-[11px] font-bold text-slate-500 uppercase">${vnTimeStr(
+                  m.dateUtc
+                )} (VN)</span>
+                ${badge}
+              </div>
+              <div class="flex flex-col gap-2">
+                <div class="flex items-center justify-between">
+                  <div class="flex items-center gap-3">
+                    ${
+                      hc
+                        ? `<img src="https://flagcdn.com/w40/${hc}.png" class="w-6 h-4">`
+                        : ""
+                    }
+                    <span class="text-base font-black uppercase text-white">${
+                      m.home
+                    }</span>
+                  </div>
+                  <span class="score-big text-2xl">${
+                    m.hs != null ? m.hs : "-"
+                  }</span>
+                </div>
+                <div class="flex items-center justify-between">
+                  <div class="flex items-center gap-3">
+                    ${
+                      ac
+                        ? `<img src="https://flagcdn.com/w40/${ac}.png" class="w-6 h-4">`
+                        : ""
+                    }
+                    <span class="text-base font-black uppercase text-white">${
+                      m.away
+                    }</span>
+                  </div>
+                  <span class="score-big text-2xl">${
+                    m.as != null ? m.as : "-"
+                  }</span>
+                </div>
+              </div>
+              <div class="mt-2 text-right">${pen}</div>
+            </div>`;
+          })
+          .join("");
+      }
+
+      // Vẽ lại view đang mở để tỉ số mới chèn vào lịch
+      let activeView = { type: "group", id: "A" };
+      function refreshActiveView() {
+        if (activeView.type === "group") {
+          const btns = [...document.querySelectorAll(".phase-btn")];
+          const btn = btns.find((b) => b.innerText === "Bảng " + activeView.id);
+          if (btn) renderGroupIcons(activeView.id, btn);
+        } else if (activeView.type === "day") {
+          const btns = [...document.querySelectorAll(".phase-btn")];
+          const btn = btns.find((b) => b.innerText === activeView.id);
+          if (btn) renderVongBangDay(activeView.id, btn);
+        }
+        renderTopMatches();
+      }
+
+      /* =========================================================
+         GIAO DIỆN
+         ========================================================= */
       function toggleMenu(show) {
         const s = document.getElementById("sidebar");
         const o = document.getElementById("overlay");
@@ -951,6 +1309,22 @@
         return res;
       }
 
+      // Ngày "12/06" + giờ "02:00" (VN) -> Date chuẩn UTC+7
+      function vnDate(d, t) {
+        const [dd, mm] = d.split("/");
+        return new Date(`2026-${mm}-${dd}T${t}:00+07:00`);
+      }
+
+      function allStaticMatches() {
+        const list = [];
+        for (let day in vongBangDays) {
+          vongBangDays[day].forEach((m) =>
+            list.push({ ...m, d: day, when: vnDate(day, m.t) })
+          );
+        }
+        return list.sort((a, b) => a.when - b.when);
+      }
+
       function openTeamPopup(teamName) {
         let teamData = null;
         for (let g in groupTeams) {
@@ -981,22 +1355,30 @@
                     <p class="worldcup-font text-lg text-white border-b-2 border-[#d4af37]/30 pb-2 mb-4 uppercase italic tracking-widest text-center">Lịch Thi Đấu Đội Tuyển</p>
                     <div class="grid grid-cols-1 gap-3">
                         ${matches
-                          .map(
-                            (m) => `
+                          .map((m) => {
+                            const s = getScore(m.h, m.a);
+                            const opp = m.h === teamName ? m.a : m.h;
+                            const right = s
+                              ? `<span class="score-big text-xl md:text-2xl">${
+                                  s.hs
+                                } - ${s.as}</span>
+                                 <span class="block text-[9px] ${
+                                   s.status === "live"
+                                     ? "text-[#ff8aa0]"
+                                     : "text-[#00f2ff]"
+                                 } font-bold uppercase tracking-widest">${
+                                  s.status === "live"
+                                    ? "LIVE " + (s.minute || "")
+                                    : "Kết thúc"
+                                }</span>`
+                              : `<span class="worldcup-font text-[#00f2ff] text-xl md:text-2xl">${m.t}</span>
+                                 <span class="block text-[9px] text-[#d4af37] font-bold uppercase tracking-widest">Bảng ${m.g}</span>`;
+                            return `
                             <div class="glass p-4 rounded-2xl flex justify-between items-center border border-white/5">
-                                <div class="text-left"><span class="block text-slate-400 font-bold text-[10px] uppercase">${
-                                  m.d
-                                }</span><span class="text-white font-black text-sm md:text-lg uppercase tracking-tighter">vs ${
-                              m.h === teamName ? m.a : m.h
-                            }</span></div>
-                                <div class="text-right"><span class="worldcup-font text-[#00f2ff] text-xl md:text-2xl">${
-                                  m.t
-                                }</span><span class="block text-[9px] text-[#d4af37] font-bold uppercase tracking-widest">Bảng ${
-                              m.g
-                            }</span></div>
-                            </div>
-                        `
-                          )
+                                <div class="text-left"><span class="block text-slate-400 font-bold text-[10px] uppercase">${m.d}</span><span class="text-white font-black text-sm md:text-lg uppercase tracking-tighter">vs ${opp}</span></div>
+                                <div class="text-right">${right}</div>
+                            </div>`;
+                          })
                           .join("")}
                     </div>
                 </div>
@@ -1012,6 +1394,7 @@
       }
 
       function renderGroupIcons(id, btn) {
+        activeView = { type: "group", id };
         document
           .querySelectorAll(".phase-btn")
           .forEach((b) => b.classList.remove("active"));
@@ -1034,19 +1417,23 @@
                   }</span>
                   <div class="match-mini">
                     ${ms
-                      .map(
-                        (m) => `
+                      .map((m) => {
+                        const s = getScore(m.h, m.a);
+                        const right = s
+                          ? `<span class="match-mini-score">${s.hs}-${s.as}${
+                              s.status === "live" ? " ⚡" : ""
+                            }</span>`
+                          : `<span class="match-mini-time">${m.t}</span>`;
+                        return `
                       <div class="match-mini-item">
                         <div class="match-mini-header"><span>${
                           m.d
-                        }</span><span class="match-mini-time">${
-                          m.t
-                        }</span></div>
+                        }</span>${right}</div>
                         <div class="match-mini-vs">vs ${
                           m.h === t.n ? m.a : m.h
                         }</div>
-                      </div>`
-                      )
+                      </div>`;
+                      })
                       .join("")}
                   </div>
                   <span class="mt-auto text-[10px] text-[#d4af37] font-bold uppercase tracking-[0.2em] opacity-60">Xem Đội Tuyển</span>
@@ -1056,56 +1443,37 @@
           </div>`;
       }
 
+      // "Trận đấu sắp tới" — tự lấy 4 trận kế tiếp theo giờ VN
       function renderTopMatches() {
-        const matches = [
-          {
-            d: "12/06",
-            g: "02:00",
-            b: "A",
-            h: "Mexico",
-            a: "Nam Phi",
-            hc: "mx",
-            ac: "za",
-          },
-          {
-            d: "12/06",
-            g: "09:00",
-            b: "A",
-            h: "Hàn Quốc",
-            a: "C.H Séc",
-            hc: "kr",
-            ac: "cz",
-          },
-          {
-            d: "13/06",
-            g: "02:00",
-            b: "B",
-            h: "Canada",
-            a: "Bosnia",
-            hc: "ca",
-            ac: "ba",
-          },
-          {
-            d: "13/06",
-            g: "08:00",
-            b: "D",
-            h: "Mỹ",
-            a: "Paraguay",
-            hc: "us",
-            ac: "py",
-          },
-        ];
-        document.getElementById("recent-grid").innerHTML = matches
-          .map(
-            (m) => `
+        const now = Date.now();
+        const upcoming = allStaticMatches()
+          .filter((m) => m.when.getTime() > now - 1000 * 60 * 130) // trận đang/ sắp đá
+          .slice(0, 4);
+        document.getElementById("recent-grid").innerHTML = upcoming
+          .map((m) => {
+            const hc = FLAG_BY_NAME[m.h] || "";
+            const ac = FLAG_BY_NAME[m.a] || "";
+            const s = getScore(m.h, m.a);
+            const corner = s
+              ? s.status === "live"
+                ? `<span class="live-badge"><span class="live-dot"></span>${
+                    s.minute || "LIVE"
+                  }</span>`
+                : `<span class="ft-badge">FT</span>`
+              : `<span class="text-[12px] font-black text-[#D4AF37] bg-[#D4AF37]/10 px-2 py-0.5 rounded-full worldcup-font">${m.t}</span>`;
+            const score = s
+              ? `<div class="mt-2 text-center score-big text-xl">${s.hs} - ${s.as}</div>`
+              : "";
+            return `
           <div class="glass p-5 rounded-3xl border-l-4 border-l-[#D4AF37] hover:bg-white/5 transition-all">
-            <div class="flex justify-between items-center mb-3"><span class="text-[12px] font-bold text-slate-500 uppercase">Bảng ${m.b} • ${m.d}</span><span class="text-[12px] font-black text-[#D4AF37] bg-[#D4AF37]/10 px-2 py-0.5 rounded-full font-goldman">${m.g}</span></div>
+            <div class="flex justify-between items-center mb-3"><span class="text-[12px] font-bold text-slate-500 uppercase">Bảng ${m.g} • ${m.d}</span>${corner}</div>
             <div class="flex flex-col gap-2">
-              <div class="flex items-center gap-3"><img src="https://flagcdn.com/w40/${m.hc}.png" class="w-6 h-4"><span class="text-base md:text-lg font-black uppercase text-white">${m.h}</span></div>
-              <div class="flex items-center gap-3"><img src="https://flagcdn.com/w40/${m.ac}.png" class="w-6 h-4"><span class="text-base md:text-lg font-black uppercase text-white">${m.a}</span></div>
+              <div class="flex items-center gap-3"><img src="https://flagcdn.com/w40/${hc}.png" class="w-6 h-4"><span class="text-base md:text-lg font-black uppercase text-white">${m.h}</span></div>
+              <div class="flex items-center gap-3"><img src="https://flagcdn.com/w40/${ac}.png" class="w-6 h-4"><span class="text-base md:text-lg font-black uppercase text-white">${m.a}</span></div>
             </div>
-          </div>`
-          )
+            ${score}
+          </div>`;
+          })
           .join("");
       }
 
@@ -1122,10 +1490,21 @@
           btn.onclick = () => renderVongBangDay(day, btn);
           subNav.appendChild(btn);
         });
-        renderVongBangDay("12/06", subNav.firstChild);
+        // mặc định mở ngày hôm nay (giờ VN) nếu có trong lịch
+        const todayVn = new Date().toLocaleDateString("vi-VN", {
+          timeZone: "Asia/Ho_Chi_Minh",
+          day: "2-digit",
+          month: "2-digit",
+        });
+        const startDay = vongBangDays[todayVn] ? todayVn : "12/06";
+        const startBtn = [...subNav.children].find(
+          (b) => b.innerText === startDay
+        );
+        renderVongBangDay(startDay, startBtn || subNav.firstChild);
       }
 
       function renderVongBangDay(day, btn) {
+        activeView = { type: "day", id: day };
         document
           .querySelectorAll(".phase-btn")
           .forEach((b) => b.classList.remove("active"));
@@ -1134,25 +1513,31 @@
         document.getElementById("main-display").innerHTML = `
           <div class="space-y-4 w-full max-w-5xl">
             ${matches
-              .map(
-                (m) => `
+              .map((m) => {
+                const center = centerHtml(
+                  m.h,
+                  m.a,
+                  `<span class="px-4 text-[#00f2ff] italic opacity-40 text-sm md:text-xl">vs</span>`
+                );
+                return `
               <div class="glass p-4 md:p-8 rounded-[2rem] md:rounded-[3rem] border border-white/10 flex flex-col md:flex-row items-center justify-between hover:bg-white/5 transition-all gap-4">
                 <div class="w-full md:w-40 text-center md:text-left">
                   <span class="block text-[#D4AF37] font-black text-4xl md:text-5xl worldcup-font">${m.t}</span>
-                  <span class="text-xs text-slate-500 font-bold uppercase tracking-widest">Bảng ${m.g}</span>
+                  <span class="text-xs text-slate-500 font-bold uppercase tracking-widest">Bảng ${m.g} • Giờ VN</span>
                 </div>
                 <div class="flex-1 text-center font-black uppercase text-xl md:text-3xl text-white flex flex-col sm:flex-row items-center justify-center gap-2">
                   <span>${m.h}</span>
-                  <span class="px-4 text-[#00f2ff] italic opacity-40 text-sm md:text-xl">vs</span>
+                  ${center}
                   <span>${m.a}</span>
                 </div>
-              </div>`
-              )
+              </div>`;
+              })
               .join("")}
           </div>`;
       }
 
       function renderKnockout(phase) {
+        activeView = { type: "ko", id: phase };
         toggleMenu(false);
         document.getElementById("top-matches-section").style.display = "none";
         document.getElementById("display-title").innerText = phase;
@@ -1173,7 +1558,7 @@
                   <span class="px-4 text-[#00f2ff] italic opacity-30 text-sm md:text-xl">vs</span>
                   <span>${m.a}</span>
                 </div>
-                <div class="w-full md:w-40 text-center md:text-right font-black text-[#00f2ff] text-3xl md:text-5xl font-goldman">${m.g}</div>
+                <div class="w-full md:w-40 text-center md:text-right font-black text-[#00f2ff] text-3xl md:text-5xl worldcup-font">${m.g}</div>
               </div>`
               )
               .join("")}
@@ -1181,6 +1566,7 @@
       }
 
       function triggerFinal() {
+        activeView = { type: "final" };
         toggleMenu(false);
         document.getElementById("top-matches-section").style.display = "none";
         document.getElementById("display-title").innerText = "Chung Kết";
@@ -1206,25 +1592,6 @@
           </div>`;
       }
 
-      function updateCountdown() {
-        const target = new Date("June 12, 2026 02:00:00").getTime();
-        const now = new Date().getTime();
-        const diff = target - now;
-        const d = Math.floor(diff / (1000 * 60 * 60 * 24));
-        const h = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-        const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-        const s = Math.floor((diff % (1000 * 60)) / 1000);
-        document.getElementById("days").innerText =
-          d < 10 ? "0" + Math.max(0, d) : d;
-        document.getElementById("hours").innerText =
-          h < 10 ? "0" + Math.max(0, h) : h;
-        document.getElementById("minutes").innerText =
-          m < 10 ? "0" + Math.max(0, m) : m;
-        document.getElementById("seconds").innerText =
-          s < 10 ? "0" + Math.max(0, s) : s;
-      }
-      setInterval(updateCountdown, 1000);
-      updateCountdown();
       const skyConfetti = () => {
         confetti({
           particleCount: 1,
@@ -1236,7 +1603,11 @@
         requestAnimationFrame(skyConfetti);
       };
       skyConfetti();
+
+      /* ===== Khởi động ===== */
       initHomeMode();
+      syncLive(); // lấy tỉ số ngay khi mở trang
+      setInterval(syncLive, 45 * 1000); // tự làm mới mỗi 45 giây
     </script>
   </body>
 </html>
