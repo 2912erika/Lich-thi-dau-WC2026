@@ -336,9 +336,6 @@
           <div class="nav-pill" onclick="switchToDayMode()">
             <i class="fa-solid fa-calendar-day"></i> Vòng Bảng
           </div>
-          <div class="nav-pill" onclick="switchToStandings()">
-            <i class="fa-solid fa-ranking-star"></i> Bảng Xếp Hạng
-          </div>
           <div class="nav-pill" onclick="renderKnockout('Vòng 32 đội')">
             <i class="fa-solid fa-users-viewfinder"></i> Vòng 32
           </div>
@@ -1475,16 +1472,26 @@
         renderStandings("A", subNav.firstChild);
       }
 
-      function renderStandings(groupId, btn) {
-        activeView = { type: "standings", id: groupId };
-        document
-          .querySelectorAll(".phase-btn")
-          .forEach((b) => b.classList.remove("active"));
-        if (btn) btn.classList.add("active");
+      // Cache advancement odds: only re-run the Monte Carlo when scores change,
+      // so switching between groups on the home page stays instant.
+      let _advCache = { sig: "", probs: {} };
+      function advancementOdds() {
+        let sig = "";
+        for (const d in vongBangDays) {
+          for (const m of vongBangDays[d]) {
+            const s = getScore(m.h, m.a);
+            if (s) sig += m.h + s.hs + "-" + s.as + s.status + ";";
+          }
+        }
+        if (sig !== _advCache.sig)
+          _advCache = { sig, probs: simulateAdvancement() };
+        return _advCache.probs;
+      }
 
+      // Standings table (with advancement %) for one group, as an HTML string
+      function standingsTableHtml(groupId) {
         const rows = computeStandings(groupId);
-        const prob = simulateAdvancement(); // fresh odds from current scores
-
+        const prob = advancementOdds();
         const body = rows
           .map((r, i) => {
             const pos = i + 1;
@@ -1530,8 +1537,13 @@
           })
           .join("");
 
-        document.getElementById("main-display").innerHTML = `
-          <div class="w-full max-w-4xl">
+        return `
+          <div class="w-full max-w-4xl mt-12 md:mt-16">
+            <div class="flex items-center gap-4 mb-6">
+              <div class="h-px flex-1 bg-gradient-to-r from-transparent via-[#D4AF37]/50 to-transparent"></div>
+              <h3 class="worldcup-font text-base md:text-xl text-[#D4AF37] uppercase italic tracking-widest">Bảng Xếp Hạng</h3>
+              <div class="h-px flex-1 bg-gradient-to-r from-transparent via-[#D4AF37]/50 to-transparent"></div>
+            </div>
             <div class="overflow-x-auto no-scrollbar">
               <table class="w-full border-collapse text-sm">
                 <thead>
@@ -1556,9 +1568,19 @@
             </div>
             <p class="text-[11px] text-slate-500 mt-3 leading-relaxed">
               Cột <span class="text-[#d4af37] font-bold">Đi tiếp</span> = tỉ lệ vào vòng 32 đội, mô phỏng từ kết quả hiện có
-              (2 đội đầu mỗi bảng + 8 đội hạng 3 tốt nhất). Tỉ lệ tự cập nhật theo tỉ số, kể cả trận đang đá.
+              (2 đội đầu mỗi bảng + 8 đội hạng 3 tốt nhất). Tỉ lệ tự cập nhật theo tỉ số.
             </p>
           </div>`;
+      }
+
+      function renderStandings(groupId, btn) {
+        activeView = { type: "standings", id: groupId };
+        document
+          .querySelectorAll(".phase-btn")
+          .forEach((b) => b.classList.remove("active"));
+        if (btn) btn.classList.add("active");
+        document.getElementById("main-display").innerHTML =
+          standingsTableHtml(groupId);
       }
       /* =========================================================
          GIAO DIỆN
@@ -1641,7 +1663,17 @@
                     <div class="grid grid-cols-1 gap-3">
                         ${matches
                           .map((m) => {
-                            const s = getScore(m.h, m.a);
+                            const raw = getScore(m.h, m.a);
+                            // Always show the viewed team's score first, opponent second
+                            const home = m.h === teamName;
+                            const s = raw
+                              ? {
+                                  hs: home ? raw.hs : raw.as,
+                                  as: home ? raw.as : raw.hs,
+                                  status: raw.status,
+                                  minute: raw.minute,
+                                }
+                              : null;
                             const opp = m.h === teamName ? m.a : m.h;
                             const right = s
                               ? `<span class="score-big text-xl md:text-2xl">${
@@ -1725,7 +1757,8 @@
                 </div>`;
               })
               .join("")}
-          </div>`;
+          </div>
+          ${standingsTableHtml(id)}`;
       }
 
       // "Trận đấu sắp tới" — tự lấy 4 trận kế tiếp theo giờ VN
@@ -2049,18 +2082,6 @@
             </div>
           </div>`;
       }
-
-      const skyConfetti = () => {
-        confetti({
-          particleCount: 1,
-          startVelocity: 0,
-          gravity: 0.4,
-          origin: { x: Math.random(), y: -0.1 },
-          colors: ["#ffffff", "#D4AF37", "#00f2ff"],
-        });
-        requestAnimationFrame(skyConfetti);
-      };
-      skyConfetti();
 
       /* ===== Khởi động ===== */
       initHomeMode();
