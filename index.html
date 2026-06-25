@@ -58,39 +58,62 @@
       .worldcup-font {
         font-family: "Goldman", cursive;
       }
-
-      /* Sidebar */
-      #sidebar {
+      /* Top navigation bar (horizontal) */
+      #topnav {
         position: fixed;
         top: 0;
-        left: -350px;
-        width: 320px;
-        height: 100%;
-        background: rgba(1, 10, 25, 0.98);
-        backdrop-filter: blur(40px);
-        z-index: 1000;
-        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-        border-right: 1px solid rgba(212, 175, 55, 0.3);
-      }
-      #sidebar.active {
         left: 0;
+        width: 100%;
+        z-index: 1000;
+        background: rgba(1, 10, 25, 0.92);
+        backdrop-filter: blur(30px);
+        border-bottom: 1px solid rgba(212, 175, 55, 0.3);
       }
-      .menu-item {
-        padding: 1.2rem 2rem;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-        transition: 0.3s;
-        cursor: pointer;
+      .topnav-inner {
         display: flex;
         align-items: center;
-        gap: 15px;
+        gap: 1.25rem;
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 0.7rem 1.25rem;
+      }
+      .topnav-logo {
+        color: #d4af37;
+        font-size: 1.35rem;
+        font-style: italic;
+        text-transform: uppercase;
+        white-space: nowrap;
+        flex-shrink: 0;
+      }
+      .topnav-items {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        overflow-x: auto;
+        scrollbar-width: none;
+      }
+      .topnav-items::-webkit-scrollbar {
+        display: none;
+      }
+      .nav-pill {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 0.55rem 1.1rem;
+        border-radius: 999px;
         font-weight: 800;
         text-transform: uppercase;
-        font-size: 14px;
+        font-size: 13px;
         color: #cbd5e1;
+        cursor: pointer;
+        white-space: nowrap;
+        transition: 0.2s;
+        border: 1px solid transparent;
       }
-      .menu-item:hover {
+      .nav-pill:hover {
         background: rgba(212, 175, 55, 0.15);
         color: #d4af37;
+        border-color: rgba(212, 175, 55, 0.3);
       }
       #overlay {
         position: fixed;
@@ -303,51 +326,37 @@
       <div id="popup-content"></div>
     </div>
 
-    <button
-      onclick="toggleMenu(true)"
-      class="fixed top-4 left-4 md:top-8 md:left-8 z-[1100] w-12 h-12 md:w-14 md:h-14 glass rounded-2xl flex items-center justify-center text-[#D4AF37] text-xl md:text-2xl border border-[#D4AF37]/50 hover:scale-110 transition-transform shadow-2xl"
-    >
-      <i class="fa-solid fa-bars-staggered"></i>
-    </button>
-
-    <nav id="sidebar">
-      <div
-        class="pt-28 pb-8 px-8 border-b border-white/10 flex justify-between items-center"
-      >
-        <span class="worldcup-font text-3xl text-[#D4AF37] italic uppercase"
-          >FIFA 2026</span
-        >
-        <button
-          onclick="toggleMenu(false)"
-          class="text-slate-400 hover:text-white text-2xl"
-        >
-          <i class="fa-solid fa-xmark"></i>
-        </button>
-      </div>
-      <div class="py-4">
-        <div class="menu-item" onclick="location.reload()">
-          <i class="fa-solid fa-house"></i> Trang Chủ
-        </div>
-        <div class="menu-item" onclick="switchToDayMode()">
-          <i class="fa-solid fa-calendar-day"></i> Vòng Bảng (Ngày)
-        </div>
-        <div class="menu-item" onclick="renderKnockout('Vòng 32 đội')">
-          <i class="fa-solid fa-users-viewfinder"></i> Vòng 32 đội
-        </div>
-        <div class="menu-item" onclick="renderKnockout('Vòng 16 đội')">
-          <i class="fa-solid fa-sitemap"></i> Vòng 16 đội
-        </div>
-        <div class="menu-item" onclick="renderKnockout('Vòng Tứ Kết')">
-          <i class="fa-solid fa-trophy"></i> Vòng Tứ Kết
-        </div>
-        <div class="menu-item" onclick="renderKnockout('Vòng Bán Kết')">
-          <i class="fa-solid fa-bolt text-yellow-400"></i> Vòng Bán Kết
-        </div>
-        <div class="menu-item" onclick="renderKnockout('Tranh Hạng Ba')">
-          <i class="fa-solid fa-medal text-slate-400"></i> Tranh Hạng Ba
-        </div>
-        <div class="menu-item text-white font-black" onclick="triggerFinal()">
-          <i class="fa-solid fa-crown text-yellow-400"></i> Chung Kết
+    <nav id="topnav">
+      <div class="topnav-inner">
+        <span class="topnav-logo worldcup-font">FIFA 2026</span>
+        <div class="topnav-items">
+          <div class="nav-pill" onclick="location.reload()">
+            <i class="fa-solid fa-house"></i> Trang Chủ
+          </div>
+          <div class="nav-pill" onclick="switchToDayMode()">
+            <i class="fa-solid fa-calendar-day"></i> Vòng Bảng
+          </div>
+          <div class="nav-pill" onclick="switchToStandings()">
+            <i class="fa-solid fa-ranking-star"></i> Bảng Xếp Hạng
+          </div>
+          <div class="nav-pill" onclick="renderKnockout('Vòng 32 đội')">
+            <i class="fa-solid fa-users-viewfinder"></i> Vòng 32
+          </div>
+          <div class="nav-pill" onclick="renderKnockout('Vòng 16 đội')">
+            <i class="fa-solid fa-sitemap"></i> Vòng 16
+          </div>
+          <div class="nav-pill" onclick="renderKnockout('Vòng Tứ Kết')">
+            <i class="fa-solid fa-trophy"></i> Tứ Kết
+          </div>
+          <div class="nav-pill" onclick="renderKnockout('Vòng Bán Kết')">
+            <i class="fa-solid fa-bolt text-yellow-400"></i> Bán Kết
+          </div>
+          <div class="nav-pill" onclick="renderKnockout('Tranh Hạng Ba')">
+            <i class="fa-solid fa-medal text-slate-400"></i> Hạng Ba
+          </div>
+          <div class="nav-pill text-white" onclick="triggerFinal()">
+            <i class="fa-solid fa-crown text-yellow-400"></i> Chung Kết
+          </div>
         </div>
       </div>
     </nav>
@@ -1262,24 +1271,300 @@
           const btns = [...document.querySelectorAll(".phase-btn")];
           const btn = btns.find((b) => b.innerText === activeView.id);
           if (btn) renderVongBangDay(activeView.id, btn);
+        } else if (activeView.type === "standings") {
+          const btns = [...document.querySelectorAll(".phase-btn")];
+          const btn = btns.find((b) => b.innerText === "Bảng " + activeView.id);
+          if (btn) renderStandings(activeView.id, btn);
+        } else if (activeView.type === "ko") {
+          renderKnockout(activeView.id);
         }
         renderTopMatches();
       }
 
       /* =========================================================
+         GROUP STANDINGS + ADVANCEMENT ODDS
+         - Standings are built from live/finished scores (getScore).
+         - Advancement odds use a Monte Carlo over ALL 12 groups at
+           once: top 2 of each group + 8 best third-placed teams
+           reach the Round of 32. Odds refresh with every new score.
+         ========================================================= */
+
+      // All 6 matches of one group, with the current score if any
+      function groupMatches(groupId) {
+        const out = [];
+        for (const day in vongBangDays) {
+          vongBangDays[day].forEach((m) => {
+            if (m.g === groupId) {
+              const s = getScore(m.h, m.a); // ft or live score, else null
+              out.push({
+                home: m.h,
+                away: m.a,
+                hs: s ? s.hs : null,
+                as: s ? s.as : null,
+                done: !!s,
+              });
+            }
+          });
+        }
+        return out;
+      }
+
+      function blankTable(groupId) {
+        const t = {};
+        groupTeams[groupId].forEach((team) => {
+          t[team.n] = {
+            n: team.n,
+            c: team.c,
+            P: 0,
+            W: 0,
+            D: 0,
+            L: 0,
+            GF: 0,
+            GA: 0,
+            GD: 0,
+            Pts: 0,
+          };
+        });
+        return t;
+      }
+
+      function applyResult(table, home, away, hs, as) {
+        const H = table[home],
+          A = table[away];
+        if (!H || !A) return;
+        H.P++;
+        A.P++;
+        H.GF += hs;
+        H.GA += as;
+        A.GF += as;
+        A.GA += hs;
+        if (hs > as) {
+          H.W++;
+          H.Pts += 3;
+          A.L++;
+        } else if (hs < as) {
+          A.W++;
+          A.Pts += 3;
+          H.L++;
+        } else {
+          H.D++;
+          A.D++;
+          H.Pts++;
+          A.Pts++;
+        }
+        H.GD = H.GF - H.GA;
+        A.GD = A.GF - A.GA;
+      }
+
+      // Tiebreak: points -> goal difference -> goals for -> name
+      function rankCompare(a, b) {
+        if (b.Pts !== a.Pts) return b.Pts - a.Pts;
+        if (b.GD !== a.GD) return b.GD - a.GD;
+        if (b.GF !== a.GF) return b.GF - a.GF;
+        return a.n.localeCompare(b.n);
+      }
+
+      // Sorted standings of one group, built from known scores
+      function computeStandings(groupId) {
+        const table = blankTable(groupId);
+        groupMatches(groupId).forEach((m) => {
+          if (m.done && m.hs != null && m.as != null) {
+            applyResult(table, m.home, m.away, m.hs, m.as);
+          }
+        });
+        return Object.values(table).sort(rankCompare);
+      }
+
+      // Poisson goal sampler (Knuth), mean ~1.35 goals per team
+      function samplePoisson(lambda) {
+        const L = Math.exp(-lambda);
+        let k = 0,
+          p = 1;
+        do {
+          k++;
+          p *= Math.random();
+        } while (p > L);
+        return k - 1;
+      }
+
+      const SIM_RUNS = 3000;
+
+      // Monte Carlo: P(each team reaches Round of 32). Returns name -> 0..1
+      function simulateAdvancement() {
+        const groups = Object.keys(groupTeams);
+        const fixed = {},
+          pending = {};
+        groups.forEach((g) => {
+          fixed[g] = [];
+          pending[g] = [];
+          groupMatches(g).forEach((m) => {
+            if (m.done && m.hs != null && m.as != null) {
+              fixed[g].push({ home: m.home, away: m.away, hs: m.hs, as: m.as });
+            } else {
+              pending[g].push({ home: m.home, away: m.away });
+            }
+          });
+        });
+
+        const advCount = {};
+        groups.forEach((g) =>
+          groupTeams[g].forEach((t) => (advCount[t.n] = 0))
+        );
+
+        for (let run = 0; run < SIM_RUNS; run++) {
+          const thirds = [];
+          groups.forEach((g) => {
+            const table = blankTable(g);
+            fixed[g].forEach((m) =>
+              applyResult(table, m.home, m.away, m.hs, m.as)
+            );
+            pending[g].forEach((m) =>
+              applyResult(
+                table,
+                m.home,
+                m.away,
+                samplePoisson(1.35),
+                samplePoisson(1.35)
+              )
+            );
+            const ranked = Object.values(table).sort(rankCompare);
+            advCount[ranked[0].n]++; // group winner advances
+            advCount[ranked[1].n]++; // runner-up advances
+            thirds.push(ranked[2]); // 3rd place fights for a wildcard
+          });
+          // 8 best third-placed teams advance
+          thirds
+            .sort(rankCompare)
+            .slice(0, 8)
+            .forEach((t) => advCount[t.n]++);
+        }
+
+        const probs = {};
+        Object.keys(advCount).forEach(
+          (n) => (probs[n] = advCount[n] / SIM_RUNS)
+        );
+        return probs;
+      }
+
+      // Coloured percentage cell
+      function probCell(p) {
+        if (p == null) return `<span class="text-slate-500">--</span>`;
+        const pct = Math.round(p * 100);
+        let color = "#64748b";
+        if (pct >= 90) color = "#22c55e";
+        else if (pct >= 40) color = "#f59e0b";
+        else if (pct > 0) color = "#ef4444";
+        return `<span style="color:${color}" class="font-black worldcup-font">${pct}%</span>`;
+      }
+
+      function switchToStandings() {
+        activeView = { type: "standings", id: "A" };
+        toggleMenu(false);
+        document.getElementById("top-matches-section").style.display = "none";
+        document.getElementById("display-title").innerText = "Bảng Xếp Hạng";
+        const subNav = document.getElementById("sub-navigation");
+        subNav.innerHTML = "";
+        Object.keys(groupTeams).forEach((id) => {
+          const btn = document.createElement("button");
+          btn.className =
+            "phase-btn px-6 py-3 rounded-2xl font-black uppercase";
+          btn.innerText = "Bảng " + id;
+          btn.onclick = () => renderStandings(id, btn);
+          subNav.appendChild(btn);
+        });
+        renderStandings("A", subNav.firstChild);
+      }
+
+      function renderStandings(groupId, btn) {
+        activeView = { type: "standings", id: groupId };
+        document
+          .querySelectorAll(".phase-btn")
+          .forEach((b) => b.classList.remove("active"));
+        if (btn) btn.classList.add("active");
+
+        const rows = computeStandings(groupId);
+        const prob = simulateAdvancement(); // fresh odds from current scores
+
+        const body = rows
+          .map((r, i) => {
+            const pos = i + 1;
+            const tint =
+              pos <= 2 ? "bg-[#d4af37]/10" : pos === 3 ? "bg-[#00f2ff]/5" : "";
+            const bar =
+              pos <= 2
+                ? "border-l-[#d4af37]"
+                : pos === 3
+                ? "border-l-[#00f2ff]"
+                : "border-l-transparent";
+            return `
+            <tr class="${tint} border-b border-white/5">
+              <td class="py-3 pl-3 border-l-4 ${bar} font-black text-slate-400">${pos}</td>
+              <td class="py-3 px-2">
+                <div class="flex items-center gap-2">
+                  <img src="https://flagcdn.com/w40/${
+                    r.c
+                  }.png" class="w-6 h-4 rounded-sm">
+                  <span class="font-black uppercase text-white text-sm md:text-base">${
+                    r.n
+                  }</span>
+                </div>
+              </td>
+              <td class="text-center text-slate-300">${r.P}</td>
+              <td class="text-center text-slate-300 hidden sm:table-cell">${
+                r.W
+              }</td>
+              <td class="text-center text-slate-300 hidden sm:table-cell">${
+                r.D
+              }</td>
+              <td class="text-center text-slate-300 hidden sm:table-cell">${
+                r.L
+              }</td>
+              <td class="text-center text-slate-300">${r.GD > 0 ? "+" : ""}${
+              r.GD
+            }</td>
+              <td class="text-center text-[#d4af37] font-black worldcup-font text-base">${
+                r.Pts
+              }</td>
+              <td class="text-center pr-3">${probCell(prob[r.n])}</td>
+            </tr>`;
+          })
+          .join("");
+
+        document.getElementById("main-display").innerHTML = `
+          <div class="w-full max-w-4xl">
+            <div class="overflow-x-auto no-scrollbar">
+              <table class="w-full border-collapse text-sm">
+                <thead>
+                  <tr class="text-[10px] md:text-xs uppercase tracking-widest text-slate-500 border-b-2 border-[#d4af37]/30">
+                    <th class="py-3 pl-3 text-left">#</th>
+                    <th class="py-3 px-2 text-left">Đội</th>
+                    <th class="py-3 text-center">ST</th>
+                    <th class="py-3 text-center hidden sm:table-cell">T</th>
+                    <th class="py-3 text-center hidden sm:table-cell">H</th>
+                    <th class="py-3 text-center hidden sm:table-cell">B</th>
+                    <th class="py-3 text-center">HS</th>
+                    <th class="py-3 text-center">Đ</th>
+                    <th class="py-3 text-center pr-3">Đi tiếp</th>
+                  </tr>
+                </thead>
+                <tbody>${body}</tbody>
+              </table>
+            </div>
+            <div class="flex flex-wrap gap-4 mt-6 text-[11px] font-bold uppercase tracking-wider text-slate-400">
+              <span class="flex items-center gap-2"><span class="w-3 h-3 rounded-sm bg-[#d4af37]"></span>Top 2 — đi tiếp</span>
+              <span class="flex items-center gap-2"><span class="w-3 h-3 rounded-sm bg-[#00f2ff]"></span>Hạng 3 — tranh vé vớt</span>
+            </div>
+            <p class="text-[11px] text-slate-500 mt-3 leading-relaxed">
+              Cột <span class="text-[#d4af37] font-bold">Đi tiếp</span> = tỉ lệ vào vòng 32 đội, mô phỏng từ kết quả hiện có
+              (2 đội đầu mỗi bảng + 8 đội hạng 3 tốt nhất). Tỉ lệ tự cập nhật theo tỉ số, kể cả trận đang đá.
+            </p>
+          </div>`;
+      }
+      /* =========================================================
          GIAO DIỆN
          ========================================================= */
-      function toggleMenu(show) {
-        const s = document.getElementById("sidebar");
-        const o = document.getElementById("overlay");
-        if (show) {
-          s.classList.add("active");
-          o.style.display = "block";
-        } else {
-          s.classList.remove("active");
-          o.style.display = "none";
-        }
-      }
+      // Horizontal nav is always on screen — nothing to open or close.
+      function toggleMenu() {}
 
       function initHomeMode() {
         document.getElementById("top-matches-section").style.display = "block";
@@ -1536,6 +1821,172 @@
           </div>`;
       }
 
+      // ---- Resolve R32 group-based slots into real team names ----
+
+      // True only when all 6 matches of a group are FINISHED (ft)
+      function groupFinished(groupId) {
+        let n = 0;
+        for (const day in vongBangDays) {
+          for (const m of vongBangDays[day]) {
+            if (m.g === groupId) {
+              const s = getScore(m.h, m.a);
+              if (!s || s.status !== "ft") return false;
+              n++;
+            }
+          }
+        }
+        return n === 6;
+      }
+
+      // Assign the 8 best third-placed teams to the 8 R32 "Thứ 3" slots.
+      // Returns { "Thứ 3 ABCDF": teamName, ... }, or {} if not resolvable yet.
+      function buildThirdMap() {
+        const groups = Object.keys(groupTeams);
+        if (!groups.every(groupFinished)) return {}; // need every group done
+        const thirds = groups.map((g) => ({ g, team: computeStandings(g)[2] }));
+        thirds.sort((a, b) => rankCompare(a.team, b.team));
+        const qualified = thirds.slice(0, 8).map((x) => x.g); // 8 group letters
+
+        const slots = (knockoutData["Vòng 32 đội"] || [])
+          .flatMap((mt) => [mt.h, mt.a])
+          .filter((l) => l.startsWith("Thứ 3"))
+          .map((l) => ({
+            label: l,
+            allowed: l.replace("Thứ 3 ", "").split(""),
+          }));
+
+        // Match each qualified group to a slot whose allowed-set contains it
+        const map = {};
+        const used = new Set();
+        function assign(i) {
+          if (i === slots.length) return true;
+          for (const g of qualified) {
+            if (!used.has(g) && slots[i].allowed.includes(g)) {
+              used.add(g);
+              map[slots[i].label] = g;
+              if (assign(i + 1)) return true;
+              used.delete(g);
+              delete map[slots[i].label];
+            }
+          }
+          return false;
+        }
+        if (!assign(0)) return {};
+
+        const out = {};
+        Object.keys(map).forEach(
+          (l) => (out[l] = computeStandings(map[l])[2].n)
+        );
+        return out;
+      }
+
+      // One slot label -> real team name, or null if not decided yet
+      function resolveR32(label, thirdMap) {
+        const gm = label.match(/bảng ([A-L])$/);
+        if ((label.startsWith("Nhất") || label.startsWith("Nhì")) && gm) {
+          const g = gm[1];
+          if (!groupFinished(g)) return null;
+          const rows = computeStandings(g);
+          return label.startsWith("Nhất") ? rows[0].n : rows[1].n;
+        }
+        if (label.startsWith("Thứ 3")) return thirdMap[label] || null;
+        return null; // "Thắng trận N" (vòng trong) chưa xử lý ở đây
+      }
+
+      // Slot HTML: real team + flag if known, else the dimmed placeholder
+      function slotHtml(label, thirdMap) {
+        const team = resolveR32(label, thirdMap);
+        if (!team) return `<span class="opacity-60">${label}</span>`;
+        const code = FLAG_BY_NAME[team];
+        const flag = code
+          ? `<img src="https://flagcdn.com/w40/${code}.png" class="w-7 h-5 rounded-sm inline-block mr-2 align-middle">`
+          : "";
+        return `${flag}<span>${team}</span>`;
+      }
+
+      // ---- Resolve R32 group-based slots into real team names ----
+
+      // True only when all 6 matches of a group are FINISHED (ft)
+      function groupFinished(groupId) {
+        let n = 0;
+        for (const day in vongBangDays) {
+          for (const m of vongBangDays[day]) {
+            if (m.g === groupId) {
+              const s = getScore(m.h, m.a);
+              if (!s || s.status !== "ft") return false;
+              n++;
+            }
+          }
+        }
+        return n === 6;
+      }
+
+      // Assign the 8 best third-placed teams to the 8 R32 "Thứ 3" slots.
+      // Returns { "Thứ 3 ABCDF": teamName, ... }, or {} if not resolvable yet.
+      function buildThirdMap() {
+        const groups = Object.keys(groupTeams);
+        if (!groups.every(groupFinished)) return {}; // need every group done
+        const thirds = groups.map((g) => ({ g, team: computeStandings(g)[2] }));
+        thirds.sort((a, b) => rankCompare(a.team, b.team));
+        const qualified = thirds.slice(0, 8).map((x) => x.g); // 8 group letters
+
+        const slots = (knockoutData["Vòng 32 đội"] || [])
+          .flatMap((mt) => [mt.h, mt.a])
+          .filter((l) => l.startsWith("Thứ 3"))
+          .map((l) => ({
+            label: l,
+            allowed: l.replace("Thứ 3 ", "").split(""),
+          }));
+
+        // Match each qualified group to a slot whose allowed-set contains it
+        const map = {};
+        const used = new Set();
+        function assign(i) {
+          if (i === slots.length) return true;
+          for (const g of qualified) {
+            if (!used.has(g) && slots[i].allowed.includes(g)) {
+              used.add(g);
+              map[slots[i].label] = g;
+              if (assign(i + 1)) return true;
+              used.delete(g);
+              delete map[slots[i].label];
+            }
+          }
+          return false;
+        }
+        if (!assign(0)) return {};
+
+        const out = {};
+        Object.keys(map).forEach(
+          (l) => (out[l] = computeStandings(map[l])[2].n)
+        );
+        return out;
+      }
+
+      // One slot label -> real team name, or null if not decided yet
+      function resolveR32(label, thirdMap) {
+        const gm = label.match(/bảng ([A-L])$/);
+        if ((label.startsWith("Nhất") || label.startsWith("Nhì")) && gm) {
+          const g = gm[1];
+          if (!groupFinished(g)) return null;
+          const rows = computeStandings(g);
+          return label.startsWith("Nhất") ? rows[0].n : rows[1].n;
+        }
+        if (label.startsWith("Thứ 3")) return thirdMap[label] || null;
+        return null; // "Thắng trận N" (vòng trong) chưa xử lý ở đây
+      }
+
+      // Slot HTML: real team + flag if known, else the dimmed placeholder
+      function slotHtml(label, thirdMap) {
+        const team = resolveR32(label, thirdMap);
+        if (!team) return `<span class="opacity-60">${label}</span>`;
+        const code = FLAG_BY_NAME[team];
+        const flag = code
+          ? `<img src="https://flagcdn.com/w40/${code}.png" class="w-7 h-5 rounded-sm inline-block mr-2 align-middle">`
+          : "";
+        return `${flag}<span>${team}</span>`;
+      }
+
       function renderKnockout(phase) {
         activeView = { type: "ko", id: phase };
         toggleMenu(false);
@@ -1543,6 +1994,7 @@
         document.getElementById("display-title").innerText = phase;
         document.getElementById("sub-navigation").innerHTML = "";
         const ms = knockoutData[phase] || [];
+        const thirdMap = phase === "Vòng 32 đội" ? buildThirdMap() : {};
         document.getElementById("main-display").innerHTML = `
           <div class="space-y-4 w-full max-w-5xl">
             ${ms
@@ -1550,15 +2002,21 @@
                 (m) => `
               <div class="glass p-4 md:p-8 rounded-[2rem] flex flex-col md:flex-row items-center justify-between gap-4">
                 <div class="w-full md:w-40 text-center md:text-left">
-                  <span class="block text-[#D4AF37] font-black text-3xl md:text-5xl worldcup-font">#${m.t}</span>
-                  <span class="text-xs text-slate-500 font-bold uppercase">${m.d}</span>
+                  <span class="block text-[#D4AF37] font-black text-3xl md:text-5xl worldcup-font">#${
+                    m.t
+                  }</span>
+                  <span class="text-xs text-slate-500 font-bold uppercase">${
+                    m.d
+                  }</span>
                 </div>
                 <div class="flex-1 text-center font-black uppercase text-xl md:text-3xl text-white flex flex-col sm:flex-row items-center justify-center gap-2">
-                  <span>${m.h}</span>
+                  <span>${slotHtml(m.h, thirdMap)}</span>
                   <span class="px-4 text-[#00f2ff] italic opacity-30 text-sm md:text-xl">vs</span>
-                  <span>${m.a}</span>
+                  <span>${slotHtml(m.a, thirdMap)}</span>
                 </div>
-                <div class="w-full md:w-40 text-center md:text-right font-black text-[#00f2ff] text-3xl md:text-5xl worldcup-font">${m.g}</div>
+                <div class="w-full md:w-40 text-center md:text-right font-black text-[#00f2ff] text-3xl md:text-5xl worldcup-font">${
+                  m.g
+                }</div>
               </div>`
               )
               .join("")}
