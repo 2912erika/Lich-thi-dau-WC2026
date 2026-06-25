@@ -39,7 +39,6 @@
           url("https://library.sportingnews.com/styles/twitter_card_120x120/s3/2025-11/World-Cup-2026-umbrella-FTR-%281%29.jpg?itok=EmUuGN-R");
         background-size: cover;
         background-position: center;
-        animation: ken-burns 40s infinite alternate ease-in-out;
       }
       @keyframes ken-burns {
         from {
@@ -51,8 +50,8 @@
       }
 
       .glass {
-        background: rgba(15, 23, 42, 0.8);
-        backdrop-filter: blur(25px);
+        background: rgba(15, 23, 42, 0.85);
+        backdrop-filter: blur(10px);
         border: 1px solid rgba(212, 175, 55, 0.2);
       }
       .worldcup-font {
@@ -127,12 +126,10 @@
       @keyframes blink-gold {
         0%,
         100% {
-          border-color: rgba(212, 175, 55, 0.2);
-          box-shadow: 0 0 15px rgba(212, 175, 55, 0.1);
+          border-color: rgba(212, 175, 55, 0.25);
         }
         50% {
-          border-color: rgba(212, 175, 55, 1);
-          box-shadow: 0 0 30px rgba(212, 175, 55, 0.4);
+          border-color: rgba(212, 175, 55, 0.85);
         }
       }
       .team-circle {
@@ -1927,97 +1924,19 @@
       }
 
       // Slot HTML: real team + flag if known, else the dimmed placeholder
-      function slotHtml(label, thirdMap) {
+      // One slot -> flag + team name (Goldman) if known, else dimmed placeholder.
+      // side "h": flag after name (home, right-aligned). side "a": flag before name (away).
+      function slotHtml(label, thirdMap, side) {
         const team = resolveR32(label, thirdMap);
-        if (!team) return `<span class="opacity-60">${label}</span>`;
+        if (!team) {
+          return `<span class="min-w-0 font-bold uppercase text-slate-400 text-[11px] md:text-sm leading-tight opacity-80">${label}</span>`;
+        }
         const code = FLAG_BY_NAME[team];
         const flag = code
-          ? `<img src="https://flagcdn.com/w40/${code}.png" class="w-7 h-5 rounded-sm inline-block mr-2 align-middle">`
+          ? `<img src="https://flagcdn.com/w40/${code}.png" class="shrink-0 w-6 h-4 md:w-7 md:h-5 rounded-sm">`
           : "";
-        return `${flag}<span>${team}</span>`;
-      }
-
-      // ---- Resolve R32 group-based slots into real team names ----
-
-      // True only when all 6 matches of a group are FINISHED (ft)
-      function groupFinished(groupId) {
-        let n = 0;
-        for (const day in vongBangDays) {
-          for (const m of vongBangDays[day]) {
-            if (m.g === groupId) {
-              const s = getScore(m.h, m.a);
-              if (!s || s.status !== "ft") return false;
-              n++;
-            }
-          }
-        }
-        return n === 6;
-      }
-
-      // Assign the 8 best third-placed teams to the 8 R32 "Thứ 3" slots.
-      // Returns { "Thứ 3 ABCDF": teamName, ... }, or {} if not resolvable yet.
-      function buildThirdMap() {
-        const groups = Object.keys(groupTeams);
-        if (!groups.every(groupFinished)) return {}; // need every group done
-        const thirds = groups.map((g) => ({ g, team: computeStandings(g)[2] }));
-        thirds.sort((a, b) => rankCompare(a.team, b.team));
-        const qualified = thirds.slice(0, 8).map((x) => x.g); // 8 group letters
-
-        const slots = (knockoutData["Vòng 32 đội"] || [])
-          .flatMap((mt) => [mt.h, mt.a])
-          .filter((l) => l.startsWith("Thứ 3"))
-          .map((l) => ({
-            label: l,
-            allowed: l.replace("Thứ 3 ", "").split(""),
-          }));
-
-        // Match each qualified group to a slot whose allowed-set contains it
-        const map = {};
-        const used = new Set();
-        function assign(i) {
-          if (i === slots.length) return true;
-          for (const g of qualified) {
-            if (!used.has(g) && slots[i].allowed.includes(g)) {
-              used.add(g);
-              map[slots[i].label] = g;
-              if (assign(i + 1)) return true;
-              used.delete(g);
-              delete map[slots[i].label];
-            }
-          }
-          return false;
-        }
-        if (!assign(0)) return {};
-
-        const out = {};
-        Object.keys(map).forEach(
-          (l) => (out[l] = computeStandings(map[l])[2].n)
-        );
-        return out;
-      }
-
-      // One slot label -> real team name, or null if not decided yet
-      function resolveR32(label, thirdMap) {
-        const gm = label.match(/bảng ([A-L])$/);
-        if ((label.startsWith("Nhất") || label.startsWith("Nhì")) && gm) {
-          const g = gm[1];
-          if (!groupFinished(g)) return null;
-          const rows = computeStandings(g);
-          return label.startsWith("Nhất") ? rows[0].n : rows[1].n;
-        }
-        if (label.startsWith("Thứ 3")) return thirdMap[label] || null;
-        return null; // "Thắng trận N" (vòng trong) chưa xử lý ở đây
-      }
-
-      // Slot HTML: real team + flag if known, else the dimmed placeholder
-      function slotHtml(label, thirdMap) {
-        const team = resolveR32(label, thirdMap);
-        if (!team) return `<span class="opacity-60">${label}</span>`;
-        const code = FLAG_BY_NAME[team];
-        const flag = code
-          ? `<img src="https://flagcdn.com/w40/${code}.png" class="w-7 h-5 rounded-sm inline-block mr-2 align-middle">`
-          : "";
-        return `${flag}<span>${team}</span>`;
+        const name = `<span class="min-w-0 worldcup-font uppercase text-white text-sm md:text-lg leading-tight">${team}</span>`;
+        return side === "h" ? `${name}${flag}` : `${flag}${name}`;
       }
 
       function renderKnockout(phase) {
@@ -2029,27 +1948,37 @@
         const ms = knockoutData[phase] || [];
         const thirdMap = phase === "Vòng 32 đội" ? buildThirdMap() : {};
         document.getElementById("main-display").innerHTML = `
-          <div class="space-y-4 w-full max-w-5xl">
+          <div class="space-y-3 md:space-y-4 w-full max-w-3xl">
             ${ms
               .map(
                 (m) => `
-              <div class="glass p-4 md:p-8 rounded-[2rem] flex flex-col md:flex-row items-center justify-between gap-4">
-                <div class="w-full md:w-40 text-center md:text-left">
-                  <span class="block text-[#D4AF37] font-black text-3xl md:text-5xl worldcup-font">#${
-                    m.t
-                  }</span>
-                  <span class="text-xs text-slate-500 font-bold uppercase">${
-                    m.d
+              <div class="glass rounded-2xl md:rounded-3xl px-4 py-3.5 md:px-7 md:py-5">
+                <div class="flex items-center justify-between mb-3">
+                  <div class="flex items-baseline gap-2 min-w-0">
+                    <span class="worldcup-font text-[#D4AF37] font-bold text-base md:text-xl leading-none">#${
+                      m.t
+                    }</span>
+                    <span class="text-[10px] md:text-xs text-slate-500 font-bold uppercase tracking-wider">${
+                      m.d
+                    }</span>
+                  </div>
+                  <span class="worldcup-font text-[#00f2ff] font-bold text-lg md:text-2xl leading-none shrink-0">${
+                    m.g
                   }</span>
                 </div>
-                <div class="flex-1 text-center font-black uppercase text-xl md:text-3xl text-white flex flex-col sm:flex-row items-center justify-center gap-2">
-                  <span>${slotHtml(m.h, thirdMap)}</span>
-                  <span class="px-4 text-[#00f2ff] italic opacity-30 text-sm md:text-xl">vs</span>
-                  <span>${slotHtml(m.a, thirdMap)}</span>
+                <div class="flex items-center justify-center gap-2 md:gap-4">
+                  <div class="flex-1 min-w-0 flex items-center justify-end gap-2 text-right">${slotHtml(
+                    m.h,
+                    thirdMap,
+                    "h"
+                  )}</div>
+                  <span class="shrink-0 text-[#00f2ff] italic font-black text-[11px] md:text-sm opacity-40">VS</span>
+                  <div class="flex-1 min-w-0 flex items-center justify-start gap-2 text-left">${slotHtml(
+                    m.a,
+                    thirdMap,
+                    "a"
+                  )}</div>
                 </div>
-                <div class="w-full md:w-40 text-center md:text-right font-black text-[#00f2ff] text-3xl md:text-5xl worldcup-font">${
-                  m.g
-                }</div>
               </div>`
               )
               .join("")}
