@@ -1257,18 +1257,17 @@
       // Vẽ lại view đang mở để tỉ số mới chèn vào lịch
       let activeView = { type: "group", id: "A" };
       function refreshActiveView() {
+        // Find the highlighted tab by its .active class, NOT by its visible text.
+        // CSS `uppercase` changes what innerText returns ("BẢNG A" vs "Bảng A"),
+        // so matching on text silently failed and the view never re-rendered
+        // after live scores loaded — that's why the table sat at all zeros.
+        const activeBtn = document.querySelector(".phase-btn.active");
         if (activeView.type === "group") {
-          const btns = [...document.querySelectorAll(".phase-btn")];
-          const btn = btns.find((b) => b.innerText === "Bảng " + activeView.id);
-          if (btn) renderGroupIcons(activeView.id, btn);
+          renderGroupIcons(activeView.id, activeBtn);
         } else if (activeView.type === "day") {
-          const btns = [...document.querySelectorAll(".phase-btn")];
-          const btn = btns.find((b) => b.innerText === activeView.id);
-          if (btn) renderVongBangDay(activeView.id, btn);
+          renderVongBangDay(activeView.id, activeBtn);
         } else if (activeView.type === "standings") {
-          const btns = [...document.querySelectorAll(".phase-btn")];
-          const btn = btns.find((b) => b.innerText === "Bảng " + activeView.id);
-          if (btn) renderStandings(activeView.id, btn);
+          renderStandings(activeView.id, activeBtn);
         } else if (activeView.type === "ko") {
           renderKnockout(activeView.id);
         }
