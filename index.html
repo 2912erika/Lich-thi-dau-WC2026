@@ -306,6 +306,155 @@
         object-fit: contain;
         display: block;
       }
+      /* ===== Sơ đồ (knockout bracket) ===== */
+      .bk-scroll {
+        overflow-x: auto;
+        width: 100%;
+        padding-bottom: 8px;
+      }
+      .bk-scroll::-webkit-scrollbar {
+        height: 8px;
+      }
+      .bk-scroll::-webkit-scrollbar-thumb {
+        background: rgba(212, 175, 55, 0.4);
+        border-radius: 4px;
+      }
+      .bk-flow {
+        display: flex;
+        min-width: 1180px;
+        padding: 0.5rem 0;
+      }
+      .bk-round {
+        display: flex;
+        flex-direction: column;
+        width: 224px;
+        flex: 0 0 224px;
+        padding: 0 18px;
+      }
+      .bk-rtitle {
+        font-family: "Goldman", cursive;
+        color: #d4af37;
+        font-size: 15px;
+        font-style: italic;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        text-align: center;
+        margin-bottom: 16px;
+      }
+      .bk-body {
+        height: 1340px;
+        display: flex;
+        flex-direction: column;
+      }
+      .bk-pair {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-around;
+        flex: 1;
+      }
+      .bk-pair.j::after {
+        content: "";
+        position: absolute;
+        left: calc(100% + 16px);
+        top: 25%;
+        bottom: 25%;
+        width: 2px;
+        background: rgba(212, 175, 55, 0.35);
+      }
+      .bk-pair.j::before {
+        content: "";
+        position: absolute;
+        left: calc(100% + 16px);
+        top: 50%;
+        width: 18px;
+        height: 2px;
+        background: rgba(212, 175, 55, 0.35);
+      }
+      .bk-pair.j > .bk-card::after {
+        content: "";
+        position: absolute;
+        left: 100%;
+        top: 50%;
+        width: 16px;
+        height: 2px;
+        background: rgba(212, 175, 55, 0.35);
+      }
+      .bk-card.in::before {
+        content: "";
+        position: absolute;
+        right: 100%;
+        top: 50%;
+        width: 18px;
+        height: 2px;
+        background: rgba(212, 175, 55, 0.35);
+      }
+      .bk-card {
+        position: relative;
+        background: rgba(19, 27, 48, 0.95);
+        border: 1px solid rgba(255, 255, 255, 0.07);
+        border-radius: 14px;
+        padding: 10px 12px;
+        min-height: 78px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        gap: 7px;
+      }
+      .bk-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .bk-no {
+        font-family: "Goldman", cursive;
+        color: #d4af37;
+        font-size: 13px;
+      }
+      .bk-when {
+        font-size: 11px;
+        color: #64748b;
+        font-weight: 600;
+      }
+      .bk-cy {
+        font-family: "Goldman", cursive;
+        color: #00f2ff;
+      }
+      .bk-t {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .bk-flag {
+        width: 20px;
+        height: 13px;
+        border-radius: 2px;
+        object-fit: cover;
+        flex: none;
+        background: #334155;
+      }
+      .bk-sh {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 20px;
+        height: 13px;
+        color: #475569;
+        font-size: 12px;
+        flex: none;
+      }
+      .bk-name {
+        font-size: 12.5px;
+        font-weight: 800;
+        color: #e2e8f0;
+        text-transform: uppercase;
+        letter-spacing: 0.02em;
+        line-height: 1.15;
+      }
+      .bk-dim {
+        color: #64748b;
+        font-weight: 700;
+      }
     </style>
   </head>
   <body>
@@ -332,6 +481,9 @@
           </div>
           <div class="nav-pill" onclick="switchToDayMode()">
             <i class="fa-solid fa-calendar-day"></i> Vòng Bảng
+          </div>
+          <div class="nav-pill" onclick="renderBracket()">
+            <i class="fa-solid fa-diagram-project"></i> Sơ Đồ
           </div>
           <div class="nav-pill" onclick="renderKnockout('Vòng 32 đội')">
             <i class="fa-solid fa-users-viewfinder"></i> Vòng 32
@@ -1270,6 +1422,8 @@
           renderStandings(activeView.id, activeBtn);
         } else if (activeView.type === "ko") {
           renderKnockout(activeView.id);
+        } else if (activeView.type === "bracket") {
+          renderBracket();
         }
         renderTopMatches();
       }
@@ -1534,7 +1688,7 @@
           .join("");
 
         return `
-          <div class="w-full max-w-4xl mt-12 md:mt-16">
+        <div class="w-full max-w-4xl">
             <div class="flex items-center gap-4 mb-6">
               <div class="h-px flex-1 bg-gradient-to-r from-transparent via-[#D4AF37]/50 to-transparent"></div>
               <h3 class="worldcup-font text-base md:text-xl text-[#D4AF37] uppercase italic tracking-widest">Bảng Xếp Hạng</h3>
@@ -1714,7 +1868,8 @@
         if (btn) btn.classList.add("active");
         const teams = groupTeams[id];
         document.getElementById("main-display").innerHTML = `
-          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 w-full max-w-7xl">
+          ${standingsTableHtml(id)}
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 w-full max-w-7xl mt-12 md:mt-16">
             ${teams
               .map((t) => {
                 const ms = getTeamMatches(t.n);
@@ -1753,8 +1908,7 @@
                 </div>`;
               })
               .join("")}
-          </div>
-          ${standingsTableHtml(id)}`;
+          </div>`;
       }
 
       // "Trận đấu sắp tới" — tự lấy 4 trận kế tiếp theo giờ VN
@@ -1984,6 +2138,137 @@
           </div>`;
       }
 
+      /* =========================================================
+         SƠ ĐỒ (knockout bracket) — tất cả các vòng nằm cạnh nhau.
+         Cột được xếp bằng cách duyệt cây từ Chung kết xuống, để mỗi
+         cặp trận nằm sát trận vòng sau mà nó dẫn tới (đường nối thẳng
+         hàng). Tên đội tự điền qua resolveR32 khi bảng xong; các vòng
+         trong hiện "Thắng trận N" cho tới khi có kết quả knock-out.
+         ========================================================= */
+      let _bracketThirds = {};
+
+      function allKoById() {
+        const all = {};
+        ["Vòng 32 đội", "Vòng 16 đội", "Vòng Tứ Kết", "Vòng Bán Kết"].forEach(
+          (ph) => (knockoutData[ph] || []).forEach((m) => (all[m.t] = m))
+        );
+        all[104] = {
+          t: 104,
+          d: "20/07",
+          g: "02:00",
+          h: "Thắng trận 101",
+          a: "Thắng trận 102",
+        };
+        return all;
+      }
+
+      function feederId(label) {
+        const m = label.match(/trận (\d+)/);
+        return m ? parseInt(m[1], 10) : null;
+      }
+
+      function roundTitle(id) {
+        if (id <= 88) return "Vòng 32";
+        if (id <= 96) return "Vòng 16";
+        if (id <= 100) return "Tứ Kết";
+        if (id <= 102) return "Bán Kết";
+        return "Chung Kết";
+      }
+
+      // Ordered columns R32 -> Final, with paired matches adjacent
+      function bracketColumns() {
+        const all = allKoById();
+        const order = {};
+        function walk(id, depth) {
+          const m = all[id];
+          if (!order[depth]) order[depth] = [];
+          if (!m) {
+            order[depth].push(id);
+            return;
+          }
+          const lh = feederId(m.h),
+            la = feederId(m.a);
+          const kids = (lh && all[lh]) || (la && all[la]);
+          if (kids) {
+            if (lh && all[lh]) walk(lh, depth + 1);
+            if (la && all[la]) walk(la, depth + 1);
+          }
+          order[depth].push(id);
+        }
+        walk(104, 0);
+        const depths = Object.keys(order)
+          .map(Number)
+          .sort((a, b) => b - a);
+        return depths.map((d) => ({
+          title: roundTitle(all[order[d][0]].t),
+          matches: order[d].map((id) => all[id]),
+        }));
+      }
+
+      // One team slot: flag + name if known, else shield + placeholder
+      function bracketSlot(label) {
+        const team = resolveR32(label, _bracketThirds);
+        if (!team) {
+          return `<div class="bk-t"><span class="bk-sh"><i class="fa-solid fa-shield-halved"></i></span><span class="bk-name bk-dim">${label}</span></div>`;
+        }
+        const code = FLAG_BY_NAME[team];
+        const flag = code
+          ? `<img src="https://flagcdn.com/w40/${code}.png" class="bk-flag">`
+          : `<span class="bk-flag"></span>`;
+        return `<div class="bk-t">${flag}<span class="bk-name">${team}</span></div>`;
+      }
+
+      function bracketCard(m, hasIncoming) {
+        return `
+    <div class="bk-card${hasIncoming ? " in" : ""}">
+      <div class="bk-top">
+        <span class="bk-no">#${m.t}</span>
+        <span class="bk-when">${m.d} · <span class="bk-cy">${m.g}</span></span>
+      </div>
+      ${bracketSlot(m.h)}
+      ${bracketSlot(m.a)}
+    </div>`;
+      }
+
+      function bracketColumnHtml(col, isLast, isFirst) {
+        let body;
+        if (isLast) {
+          body = `<div class="bk-pair">${bracketCard(
+            col.matches[0],
+            !isFirst
+          )}</div>`;
+        } else {
+          const pairs = [];
+          for (let i = 0; i < col.matches.length; i += 2) {
+            pairs.push(
+              `<div class="bk-pair j">${bracketCard(
+                col.matches[i],
+                !isFirst
+              )}${bracketCard(col.matches[i + 1], !isFirst)}</div>`
+            );
+          }
+          body = pairs.join("");
+        }
+        return `<div class="bk-round"><div class="bk-rtitle">${col.title}</div><div class="bk-body">${body}</div></div>`;
+      }
+
+      function renderBracket() {
+        activeView = { type: "bracket" };
+        toggleMenu(false);
+        document.getElementById("top-matches-section").style.display = "none";
+        document.getElementById("display-title").innerText = "Sơ Đồ";
+        document.getElementById("sub-navigation").innerHTML = "";
+        _bracketThirds = buildThirdMap();
+        const cols = bracketColumns();
+        const html = cols
+          .map((col, i) =>
+            bracketColumnHtml(col, i === cols.length - 1, i === 0)
+          )
+          .join("");
+        document.getElementById(
+          "main-display"
+        ).innerHTML = `<div class="bk-scroll"><div class="bk-flow">${html}</div></div>`;
+      }
       function triggerFinal() {
         activeView = { type: "final" };
         toggleMenu(false);
