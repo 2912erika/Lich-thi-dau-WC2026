@@ -455,6 +455,89 @@
         color: #64748b;
         font-weight: 700;
       }
+      /* ===== Thẻ Trực tiếp & Kết quả (CSS riêng, không phụ thuộc Tailwind) ===== */
+      #live-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 1rem;
+      }
+      @media (min-width: 640px) {
+        #live-grid {
+          grid-template-columns: 1fr 1fr;
+        }
+      }
+      @media (min-width: 1024px) {
+        #live-grid {
+          grid-template-columns: 1fr 1fr 1fr;
+        }
+      }
+      .live-card {
+        background: rgba(15, 23, 42, 0.92);
+        border: 1px solid rgba(212, 175, 55, 0.2);
+        border-left: 4px solid #00f2ff;
+        border-radius: 1.25rem;
+        padding: 1rem 1.1rem;
+      }
+      .live-card.is-live {
+        border-left-color: #ff3b5c;
+      }
+      .live-card-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 0.75rem;
+      }
+      .live-card-date {
+        font-size: 11px;
+        font-weight: 700;
+        color: #64748b;
+        text-transform: uppercase;
+      }
+      .live-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        padding: 3px 0;
+      }
+      .live-team {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        min-width: 0;
+      }
+      .live-team img {
+        width: 26px;
+        height: 17px;
+        border-radius: 2px;
+        flex: none;
+      }
+      .live-team span {
+        font-weight: 800;
+        text-transform: uppercase;
+        color: #fff;
+        font-size: 15px;
+        line-height: 1.1;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .live-score {
+        font-family: "Goldman", cursive;
+        color: #00f2ff;
+        font-weight: 700;
+        font-size: 24px;
+        flex: none;
+      }
+      .live-pen {
+        margin-top: 0.5rem;
+        text-align: right;
+      }
+      .live-pen-txt {
+        font-size: 11px;
+        color: #94a3b8;
+        font-weight: 700;
+      }
     </style>
   </head>
   <body>
@@ -1350,7 +1433,7 @@
             const ac = FLAG_BY_NAME[m.away];
             const pen =
               m.hp != null && m.ap != null && (m.hp > 0 || m.ap > 0)
-                ? `<span class="text-[11px] text-slate-400 font-bold">pen ${m.hp}-${m.ap}</span>`
+                ? `<span class="live-pen-txt">pen ${m.hp}-${m.ap}</span>`
                 : "";
             const badge =
               m.status === "live"
@@ -1359,48 +1442,26 @@
                   }</span>`
                 : `<span class="ft-badge">FT</span>`;
             return `
-            <div class="glass p-5 rounded-3xl border-l-4 ${
-              m.status === "live" ? "border-l-[#ff3b5c]" : "border-l-[#00f2ff]"
-            } hover:bg-white/5 transition-all">
-              <div class="flex justify-between items-center mb-3">
-                <span class="text-[11px] font-bold text-slate-500 uppercase">${vnTimeStr(
-                  m.dateUtc
-                )} (VN)</span>
+            <div class="live-card${m.status === "live" ? " is-live" : ""}">
+              <div class="live-card-top">
+                <span class="live-card-date">${vnTimeStr(m.dateUtc)} (VN)</span>
                 ${badge}
               </div>
-              <div class="flex flex-col gap-2">
-                <div class="flex items-center justify-between">
-                  <div class="flex items-center gap-3">
-                    ${
-                      hc
-                        ? `<img src="https://flagcdn.com/w40/${hc}.png" class="w-6 h-4">`
-                        : ""
-                    }
-                    <span class="text-base font-black uppercase text-white">${
-                      m.home
-                    }</span>
-                  </div>
-                  <span class="score-big text-2xl">${
-                    m.hs != null ? m.hs : "-"
-                  }</span>
+              <div class="live-row">
+                <div class="live-team">
+                  ${hc ? `<img src="https://flagcdn.com/w40/${hc}.png">` : ""}
+                  <span>${m.home}</span>
                 </div>
-                <div class="flex items-center justify-between">
-                  <div class="flex items-center gap-3">
-                    ${
-                      ac
-                        ? `<img src="https://flagcdn.com/w40/${ac}.png" class="w-6 h-4">`
-                        : ""
-                    }
-                    <span class="text-base font-black uppercase text-white">${
-                      m.away
-                    }</span>
-                  </div>
-                  <span class="score-big text-2xl">${
-                    m.as != null ? m.as : "-"
-                  }</span>
-                </div>
+                <span class="live-score">${m.hs != null ? m.hs : "-"}</span>
               </div>
-              <div class="mt-2 text-right">${pen}</div>
+              <div class="live-row">
+                <div class="live-team">
+                  ${ac ? `<img src="https://flagcdn.com/w40/${ac}.png">` : ""}
+                  <span>${m.away}</span>
+                </div>
+                <span class="live-score">${m.as != null ? m.as : "-"}</span>
+              </div>
+              ${pen ? `<div class="live-pen">${pen}</div>` : ""}
             </div>`;
           })
           .join("");
