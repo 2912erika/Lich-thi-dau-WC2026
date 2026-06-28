@@ -676,29 +676,14 @@
           <div class="nav-pill" onclick="location.reload()">
             <i class="fa-solid fa-house"></i> Trang Chủ
           </div>
-          <div class="nav-pill" onclick="switchToDayMode()">
-            <i class="fa-solid fa-calendar-day"></i> Lịch
-          </div>
           <div class="nav-pill" onclick="switchToGroups()">
             <i class="fa-solid fa-table-list"></i> Vòng Bảng
           </div>
           <div class="nav-pill" onclick="renderBracket()">
             <i class="fa-solid fa-diagram-project"></i> Sơ Đồ
           </div>
-          <div class="nav-pill" onclick="renderKnockout('Vòng 32 đội')">
-            <i class="fa-solid fa-users-viewfinder"></i> Vòng 32
-          </div>
-          <div class="nav-pill" onclick="renderKnockout('Vòng 16 đội')">
-            <i class="fa-solid fa-sitemap"></i> Vòng 16
-          </div>
-          <div class="nav-pill" onclick="renderKnockout('Vòng Tứ Kết')">
-            <i class="fa-solid fa-trophy"></i> Tứ Kết
-          </div>
-          <div class="nav-pill" onclick="renderKnockout('Vòng Bán Kết')">
-            <i class="fa-solid fa-bolt text-yellow-400"></i> Bán Kết
-          </div>
-          <div class="nav-pill" onclick="renderKnockout('Tranh Hạng Ba')">
-            <i class="fa-solid fa-medal text-slate-400"></i> Hạng Ba
+          <div class="nav-pill" onclick="switchToKnockout()">
+            <i class="fa-solid fa-sitemap"></i> Knockout
           </div>
           <div class="nav-pill text-white" onclick="triggerFinal()">
             <i class="fa-solid fa-crown text-yellow-400"></i> Chung Kết
@@ -2107,12 +2092,43 @@
       }
 
       // "Trận đấu sắp tới" — tự lấy 4 trận kế tiếp theo giờ VN
+      // "Trận đấu sắp tới" — gom cả vòng bảng + các trận knock-out đã rõ đội,
+      // tự lấy 4 trận kế tiếp theo giờ VN.
       function renderTopMatches() {
+        const grid = document.getElementById("recent-grid");
+        if (!grid) return;
         const now = Date.now();
-        const upcoming = allStaticMatches()
-          .filter((m) => m.when.getTime() > now - 1000 * 60 * 130) // trận đang/ sắp đá
+        const all = [];
+        for (const day in vongBangDays) {
+          vongBangDays[day].forEach((m) =>
+            all.push({
+              h: m.h,
+              a: m.a,
+              label: "Bảng " + m.g,
+              date: day,
+              time: m.t,
+              when: vnDate(day, m.t),
+            })
+          );
+        }
+        for (const phase in knockoutData) {
+          knockoutData[phase].forEach((m) => {
+            if (FLAG_BY_NAME[m.h] && FLAG_BY_NAME[m.a])
+              all.push({
+                h: m.h,
+                a: m.a,
+                label: phase,
+                date: m.d,
+                time: m.g,
+                when: vnDate(m.d, m.g),
+              });
+          });
+        }
+        const upcoming = all
+          .filter((m) => m.when.getTime() > now - 1000 * 60 * 130)
+          .sort((a, b) => a.when - b.when)
           .slice(0, 4);
-        document.getElementById("recent-grid").innerHTML = upcoming
+        grid.innerHTML = upcoming
           .map((m) => {
             const hc = FLAG_BY_NAME[m.h] || "";
             const ac = FLAG_BY_NAME[m.a] || "";
@@ -2123,13 +2139,13 @@
                     s.minute || "LIVE"
                   }</span>`
                 : `<span class="ft-badge">FT</span>`
-              : `<span class="text-[12px] font-black text-[#D4AF37] bg-[#D4AF37]/10 px-2 py-0.5 rounded-full worldcup-font">${m.t}</span>`;
+              : `<span class="text-[12px] font-black text-[#D4AF37] bg-[#D4AF37]/10 px-2 py-0.5 rounded-full worldcup-font">${m.time}</span>`;
             const score = s
               ? `<div class="mt-2 text-center score-big text-xl">${s.hs} - ${s.as}</div>`
               : "";
             return `
           <div class="glass p-5 rounded-3xl border-l-4 border-l-[#D4AF37] hover:bg-white/5 transition-all">
-            <div class="flex justify-between items-center mb-3"><span class="text-[12px] font-bold text-slate-500 uppercase">Bảng ${m.g} • ${m.d}</span>${corner}</div>
+            <div class="flex justify-between items-center mb-3"><span class="text-[12px] font-bold text-slate-500 uppercase">${m.label} • ${m.date}</span>${corner}</div>
             <div class="flex flex-col gap-2">
               <div class="flex items-center gap-3"><img src="https://flagcdn.com/w40/${hc}.png" class="w-6 h-4"><span class="text-base md:text-lg font-black uppercase text-white">${m.h}</span></div>
               <div class="flex items-center gap-3"><img src="https://flagcdn.com/w40/${ac}.png" class="w-6 h-4"><span class="text-base md:text-lg font-black uppercase text-white">${m.a}</span></div>
@@ -2288,12 +2304,59 @@
         return side === "h" ? `${name}${flag}` : `${flag}${name}`;
       }
 
+      // Nút "Knockout": gom Vòng 32 → Hạng Ba vào 1 chỗ, sub-nav chọn vòng.
+      function switchToKnockout() {
+        activeView = { type: "ko", id: "Vòng 32 đội" };
+        toggleMenu(false);
+        document.getElementById("top-matches-section").style.display = "none";
+        document.getElementById("display-title").innerText = "Knockout";
+        const subNav = document.getElementById("sub-navigation");
+        subNav.innerHTML = "";
+        const rounds = [
+          ["Vòng 32 đội", "Vòng 32"],
+          ["Vòng 16 đội", "Vòng 16"],
+          ["Vòng Tứ Kết", "Tứ Kết"],
+          ["Vòng Bán Kết", "Bán Kết"],
+          ["Tranh Hạng Ba", "Hạng Ba"],
+        ];
+        rounds.forEach(([ph, label]) => {
+          const btn = document.createElement("button");
+          btn.className =
+            "phase-btn px-5 py-2.5 rounded-2xl font-black uppercase";
+          btn.innerText = label;
+          btn.dataset.phase = ph;
+          btn.onclick = () => renderKnockout(ph);
+          subNav.appendChild(btn);
+        });
+        renderKnockout("Vòng 32 đội");
+      }
+      function switchToGroups() {
+        activeView = { type: "group", id: "A" };
+        toggleMenu(false);
+        document.getElementById("top-matches-section").style.display = "none";
+        document.getElementById("display-title").innerText = "Vòng Bảng";
+        const subNav = document.getElementById("sub-navigation");
+        subNav.innerHTML = "";
+        Object.keys(groupTeams).forEach((id) => {
+          const btn = document.createElement("button");
+          btn.className =
+            "phase-btn px-6 py-3 rounded-2xl font-black uppercase";
+          btn.innerText = "Bảng " + id;
+          btn.onclick = () => renderGroupIcons(id, btn);
+          subNav.appendChild(btn);
+        });
+        renderGroupIcons("A", subNav.firstChild);
+      }
       function renderKnockout(phase) {
         activeView = { type: "ko", id: phase };
         toggleMenu(false);
         document.getElementById("top-matches-section").style.display = "none";
-        document.getElementById("display-title").innerText = phase;
-        document.getElementById("sub-navigation").innerHTML = "";
+        document.getElementById("display-title").innerText = "Knockout";
+        document
+          .querySelectorAll("#sub-navigation .phase-btn")
+          .forEach((b) =>
+            b.classList.toggle("active", b.dataset.phase === phase)
+          );
         const ms = knockoutData[phase] || [];
         const thirdMap = phase === "Vòng 32 đội" ? buildThirdMap() : {};
         document.getElementById("main-display").innerHTML = `
