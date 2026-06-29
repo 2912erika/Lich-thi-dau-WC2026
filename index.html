@@ -1903,6 +1903,12 @@
       // Bấm mục khác trên menu => rời chế độ trang chủ (hiện lại khu hiển thị chính).
       function toggleMenu() {
         document.body.classList.remove("home-mode");
+        requestAnimationFrame(() => {
+          const el = document.getElementById("display-title");
+          if (!el || getComputedStyle(el).display === "none") return;
+          const top = el.getBoundingClientRect().top + window.pageYOffset - 78;
+          window.scrollTo({ top: Math.max(top, 0), behavior: "smooth" });
+        });
       }
 
       function initHomeMode() {
@@ -2357,7 +2363,9 @@
           .forEach((b) =>
             b.classList.toggle("active", b.dataset.phase === phase)
           );
-        const ms = knockoutData[phase] || [];
+        const ms = (knockoutData[phase] || [])
+          .slice()
+          .sort((a, b) => vnDate(a.d, a.g) - vnDate(b.d, b.g) || a.t - b.t);
         const thirdMap = phase === "Vòng 32 đội" ? buildThirdMap() : {};
         document.getElementById("main-display").innerHTML = `
           <div class="space-y-3 md:space-y-4 w-full max-w-3xl">
