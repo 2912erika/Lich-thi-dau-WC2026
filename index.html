@@ -457,6 +457,10 @@
         letter-spacing: 0.02em;
         line-height: 1.15;
       }
+      .bk-score { margin-left: auto; padding-left: 8px; font-family: "Goldman", cursive; color: #00f2ff; font-weight: 700; font-size: 14px; flex: none; }
+      .bk-extra { text-align: center; font-size: 10px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em; margin-top: 2px; }
+      .ko-score { flex: none; font-family: "Goldman", cursive; color: #00f2ff; font-weight: 700; font-size: 20px; }
+      .ko-extra { text-align: center; font-size: 11px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em; margin-top: 6px; }
       .bk-dim {
         color: #64748b;
         font-weight: 700;
@@ -2298,7 +2302,7 @@
       // One slot -> flag + team name (Goldman) if known, else dimmed placeholder.
       // side "h": flag after name (home, right-aligned). side "a": flag before name (away).
       function slotHtml(label, thirdMap, side) {
-        const team = resolveR32(label, thirdMap);
+        const team = resolveKO(label, thirdMap);
         if (!team) {
           return `<span class="min-w-0 font-bold uppercase text-slate-400 text-[11px] md:text-sm leading-tight opacity-80">${label}</span>`;
         }
@@ -2386,19 +2390,35 @@
                     m.g
                   }</span>
                 </div>
-                <div class="flex items-center justify-center gap-2 md:gap-4">
-                  <div class="flex-1 min-w-0 flex items-center justify-end gap-2 text-right">${slotHtml(
-                    m.h,
-                    thirdMap,
-                    "h"
-                  )}</div>
-                  <span class="shrink-0 text-[#00f2ff] italic font-black text-[11px] md:text-sm opacity-40">VS</span>
-                  <div class="flex-1 min-w-0 flex items-center justify-start gap-2 text-left">${slotHtml(
-                    m.a,
-                    thirdMap,
-                    "a"
-                  )}</div>
-                </div>
+                ${(() => {
+                  const ht = resolveKO(m.h, thirdMap),
+                    at = resolveKO(m.a, thirdMap);
+                  const sc = ht && at ? koScore(m.t, ht, at) : null;
+                  const played =
+                    sc && (sc.status === "ft" || sc.status === "live");
+                  const mid = played
+                    ? `<span class="ko-score">${sc.hs} - ${sc.as}</span>`
+                    : `<span class="shrink-0 text-[#00f2ff] italic font-black text-[11px] md:text-sm opacity-40">VS</span>`;
+                  let extra = "";
+                  if (played && sc.hp != null && sc.ap != null)
+                    extra = `pen ${sc.hp} - ${sc.ap}`;
+                  else if (played && sc.aet) extra = "Sau hiệp phụ";
+                  return `
+                  <div class="flex items-center justify-center gap-2 md:gap-4">
+                    <div class="flex-1 min-w-0 flex items-center justify-end gap-2 text-right">${slotHtml(
+                      m.h,
+                      thirdMap,
+                      "h"
+                    )}</div>
+                    ${mid}
+                    <div class="flex-1 min-w-0 flex items-center justify-start gap-2 text-left">${slotHtml(
+                      m.a,
+                      thirdMap,
+                      "a"
+                    )}</div>
+                  </div>
+                  ${extra ? `<div class="ko-extra">${extra}</div>` : ""}`;
+                })()}
               </div>`
               )
               .join("")}
@@ -2473,33 +2493,119 @@
       }
 
       // One team slot: flag + name if known, else shield + placeholder
-      function bracketSlot(label) {
-        const team = resolveR32(label, _bracketThirds);
+      // ====== Tự suy người thắng cho vòng trong (16 -> Chung kết) ======
+      // Muốn điền tay (đá pen, hoặc tỉ số live không về): koWinners[73] = "Nam Phi";
+      const koWinners = {};
+      const koScores = {};
+      // Điền tay: [hs,as]=thường | [hs,as,hp,ap]=đá pen | {h,a,aet:true}=sau hiệp phụ
+      function koScore(n, ht, at) {
+        const v = koScores[n];
+        if (v) {
+          if (Array.isArray(v)) {
+            return {
+              hs: v[0],
+              as: v[1],
+              hp: v.length > 2 ? v[2] : null,
+              ap: v.length > 3 ? v[3] : null,
+              aet: v.length > 2,
+              status: "ft",
+            };
+          }
+          return {
+            hs: v.h,
+            as: v.a,
+            hp: v.hp == null ? null : v.hp,
+            ap: v.ap == null ? null : v.ap,
+            aet: !!v.aet,
+            status: "ft",
+          };
+        }
+        const s = getScore(ht, at);
+        if (!s) return null;
+        return {
+          hs: s.hs,
+          as: s.as,
+          hp: s.hp == null ? null : s.hp,
+          ap: s.ap == null ? null : s.ap,
+          aet: !!s.aet,
+          status: s.status,
+        };
+      }
+
+      function koMatchById(n) {
+        for (const ph in knockoutData) {
+          const m = (knockoutData[ph] || []).find((x) => x.t === n);
+          if (m) return m;
+        }
+        return null;
+      }
+
+      // label -> tên đội thật (đệ quy theo cây). null nếu chưa rõ.
+      function resolveKO(label, thirdMap) {
+        const direct = resolveR32(label, thirdMap);
+        if (direct) return direct;
+        const fm = label.match(/^(Thắng|Thua) trận (\d+)/);
+        if (!fm) return null;
+        const n = parseInt(fm[2], 10);
+        const m = koMatchById(n);
+        if (!m) return null;
+        const ht = resolveKO(m.h, thirdMap);
+        const at = resolveKO(m.a, thirdMap);
+        if (!ht || !at) return null; // chưa đủ 2 đội
+        let win = koWinners[n] || null; // ưu tiên điền tay
+        if (!win) {
+          const s = koScore(n, ht, at);
+          if (!s || s.status !== "ft") return null; // chưa đá xong
+          if (s.hs > s.as) win = ht;
+          else if (s.as > s.hs) win = at;
+          else if (s.hp != null && s.ap != null) {
+            if (s.hp > s.ap) win = ht;
+            else if (s.ap > s.hp) win = at;
+          }
+        }
+        if (!win) return null; // hoà mà chưa rõ pen
+        return fm[1] === "Thắng" ? win : win === ht ? at : ht;
+      }
+
+      function bracketSlot(label, goals) {
+        const team = resolveKO(label, _bracketThirds);
         if (!team) {
-          // Vòng 16 -> Chung kết: để dòng trống để tự điền tay
           if (/^(Thắng|Thua)/.test(label)) {
             return `<div class="bk-t"><span class="bk-line"></span></div>`;
           }
-          // Vòng 32 chưa rõ đội: hiện khiên + chữ chờ
           return `<div class="bk-t"><span class="bk-sh"><i class="fa-solid fa-shield-halved"></i></span><span class="bk-name bk-dim">${label}</span></div>`;
         }
         const code = FLAG_BY_NAME[team];
         const flag = code
           ? `<img src="https://flagcdn.com/w40/${code}.png" class="bk-flag">`
           : `<span class="bk-flag"></span>`;
-        return `<div class="bk-t">${flag}<span class="bk-name">${team}</span></div>`;
+        const score =
+          goals != null ? `<span class="bk-score">${goals}</span>` : "";
+        return `<div class="bk-t">${flag}<span class="bk-name">${team}</span>${score}</div>`;
       }
 
       function bracketCard(m, hasIncoming) {
+        const ht = resolveKO(m.h, _bracketThirds);
+        const at = resolveKO(m.a, _bracketThirds);
+        const sc = ht && at ? koScore(m.t, ht, at) : null;
+        const show = sc && (sc.status === "ft" || sc.status === "live");
+        let extra = "";
+        if (show && sc.hp != null && sc.ap != null)
+          extra = `<div class="bk-extra">pen ${sc.hp}-${sc.ap}</div>`;
+        else if (show && sc.aet)
+          extra = `<div class="bk-extra">sau hiệp phụ</div>`;
         return `
-    <div class="bk-card${hasIncoming ? " in" : ""}">
-      <div class="bk-top">
-        <span class="bk-no">#${m.t}</span>
-        <span class="bk-when">${m.d} · <span class="bk-cy">${m.g}</span></span>
-      </div>
-      ${bracketSlot(m.h)}
-      ${bracketSlot(m.a)}
-    </div>`;
+          <div class="bk-card${hasIncoming ? " in" : ""}">
+            <div class="bk-top">
+              <span class="bk-no">#${m.t}</span>
+              <span class="bk-when">${m.d} · <span class="bk-cy">${
+          m.g
+        }</span></span>
+            </div>
+            ${bracketSlot(m.h, show ? sc.hs : null)}
+            ${bracketSlot(m.a, show ? sc.as : null)}
+            ${extra}
+          </div>`;
       }
 
       function bracketColumnHtml(col, isLast, isFirst) {
