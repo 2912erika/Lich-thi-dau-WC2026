@@ -325,11 +325,8 @@
         background: rgba(212, 175, 55, 0.4);
         border-radius: 4px;
       }
-      .bk-flow {
-        display: flex;
-        min-width: 1180px;
-        padding: 0.5rem 0;
-      }
+      .bk-flow { display: flex; align-items: flex-start; width: max-content; padding: 0.5rem 0; }
+
       .bk-round {
         display: flex;
         flex-direction: column;
@@ -347,65 +344,22 @@
         text-align: center;
         margin-bottom: 16px;
       }
-      .bk-body {
-        height: 1340px;
-        display: flex;
-        flex-direction: column;
-      }
-      .bk-pair {
-        position: relative;
-        display: flex;
-        flex-direction: column;
-        justify-content: space-around;
-        flex: 1;
-      }
-      .bk-pair.j::after {
-        content: "";
-        position: absolute;
-        left: calc(100% + 16px);
-        top: 25%;
-        bottom: 25%;
-        width: 2px;
-        background: rgba(212, 175, 55, 0.35);
-      }
-      .bk-pair.j::before {
-        content: "";
-        position: absolute;
-        left: calc(100% + 16px);
-        top: 50%;
-        width: 18px;
-        height: 2px;
-        background: rgba(212, 175, 55, 0.35);
-      }
-      .bk-pair.j > .bk-card::after {
-        content: "";
-        position: absolute;
-        left: 100%;
-        top: 50%;
-        width: 16px;
-        height: 2px;
-        background: rgba(212, 175, 55, 0.35);
-      }
-      .bk-card.in::before {
-        content: "";
-        position: absolute;
-        right: 100%;
-        top: 50%;
-        width: 18px;
-        height: 2px;
-        background: rgba(212, 175, 55, 0.35);
-      }
+      .bk-body { display: flex; flex-direction: column; }
+      .bk-slot { height: var(--slot-h, 116px); display: flex; flex-direction: column; justify-content: center; position: relative; }
+      .bk-round:not(:last-child) .bk-card::after { content: ""; position: absolute; left: 100%; top: 50%; width: 18px; height: 2px; background: rgba(212, 175, 55, 0.35); }
+      .bk-round:not(:last-child) .bk-slot:nth-child(odd)::after { content: ""; position: absolute; left: calc(100% + 18px); top: 50%; width: 2px; height: var(--slot-h, 116px); background: rgba(212, 175, 55, 0.35); }
+      .bk-card.in::before { content: ""; position: absolute; right: 100%; top: 50%; width: 18px; height: 2px; background: rgba(212, 175, 55, 0.35); }
       .bk-card {
         position: relative;
-        background: rgba(19, 27, 48, 0.95);
-        border: 1px solid rgba(255, 255, 255, 0.07);
+        background: rgba(23, 32, 56, 0.96);
+        border: 1.5px solid rgba(212, 175, 55, 0.4);
         border-radius: 14px;
         padding: 10px 12px;
-        min-height: 78px;
+        height: 104px;
         display: flex;
         flex-direction: column;
         justify-content: center;
-        gap: 7px;
+        gap: 6px;
       }
       .bk-top {
         display: flex;
@@ -492,6 +446,10 @@
       }
       .live-card.is-live {
         border-left-color: #ff3b5c;
+      }
+      #livenow-grid .live-card {
+        border-color: rgba(255, 59, 92, 0.45);
+        box-shadow: 0 0 24px rgba(255, 59, 92, 0.12);
       }
       .live-card-top {
         display: flex;
@@ -703,7 +661,33 @@
         FIFA WORLD <span class="text-[#D4AF37]">CUP 2026</span>
       </h1>
 
-      <!-- ===== LIVE & KẾT QUẢ ===== -->
+      <!-- ===== ĐANG ĐÁ TRỰC TIẾP ===== -->
+      <div
+        class="w-full max-w-6xl px-2 mb-16"
+        id="livenow-section"
+        style="display: none"
+      >
+        <div class="flex items-center gap-4 mb-6">
+          <div
+            class="h-px flex-1 bg-gradient-to-r from-transparent via-[#ff3b5c]/50 to-transparent"
+          ></div>
+          <h3
+            class="worldcup-font text-lg md:text-2xl text-white uppercase italic tracking-widest"
+          >
+            <span class="live-dot"></span>Đang Đá
+            <span class="text-[#ff3b5c]">Trực Tiếp</span>
+          </h3>
+          <div
+            class="h-px flex-1 bg-gradient-to-r from-transparent via-[#ff3b5c]/50 to-transparent"
+          ></div>
+        </div>
+        <div
+          class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"
+          id="livenow-grid"
+        ></div>
+      </div>
+
+      <!-- ===== KẾT QUẢ GẦN ĐÂY ===== -->
       <div
         class="w-full max-w-6xl px-2 mb-16"
         id="live-section"
@@ -714,10 +698,9 @@
             class="h-px flex-1 bg-gradient-to-r from-transparent via-[#ff3b5c]/50 to-transparent"
           ></div>
           <h3
-            class="worldcup-font text-lg md:text-2xl text-white uppercase italic tracking-widest"
+            class="worldcup-font text-lg md:text-2xl text-[#D4AF37] uppercase italic tracking-widest"
           >
-            <span class="live-dot"></span>Trực Tiếp
-            <span class="text-[#D4AF37]">&amp; Kết Quả</span>
+            Kết Quả Gần Đây
           </h3>
           <div
             class="h-px flex-1 bg-gradient-to-r from-transparent via-[#ff3b5c]/50 to-transparent"
@@ -1499,11 +1482,14 @@
       }
 
       function renderLiveSection() {
+        const liveSec = document.getElementById("livenow-section");
+        const liveGrid = document.getElementById("livenow-grid");
         const section = document.getElementById("live-section");
         const grid = document.getElementById("live-grid");
         const status = document.getElementById("live-status");
 
         if (!apiOk) {
+          if (liveSec) liveSec.style.display = "none";
           section.style.display = "none";
           return;
         }
@@ -1520,34 +1506,21 @@
           .sort((a, b) => b.dateUtc - a.dateUtc)
           .slice(0, 6);
 
-        const show = [...playing, ...finished];
-        if (!show.length) {
-          section.style.display = "none";
-          return;
-        }
-        section.style.display = "block";
-        status.innerText =
-          lastSync.toLocaleTimeString("vi-VN", {
-            timeZone: "Asia/Ho_Chi_Minh",
-            hour: "2-digit",
-            minute: "2-digit",
-          }) + " (UTC+7)";
-
-        grid.innerHTML = show
-          .map((m) => {
-            const hc = FLAG_BY_NAME[m.home];
-            const ac = FLAG_BY_NAME[m.away];
-            const pen =
-              m.hp != null && m.ap != null && (m.hp > 0 || m.ap > 0)
-                ? `<span class="live-pen-txt">pen ${m.hp}-${m.ap}</span>`
-                : "";
-            const badge =
-              m.status === "live"
-                ? `<span class="live-badge"><span class="live-dot"></span>${
-                    m.minute || "LIVE"
-                  }</span>`
-                : `<span class="ft-badge">FT</span>`;
-            return `
+        // Thẻ trận (dùng chung cho ĐANG ĐÁ và KẾT QUẢ)
+        const card = (m) => {
+          const hc = FLAG_BY_NAME[m.home];
+          const ac = FLAG_BY_NAME[m.away];
+          const pen =
+            m.hp != null && m.ap != null && (m.hp > 0 || m.ap > 0)
+              ? `<span class="live-pen-txt">pen ${m.hp}-${m.ap}</span>`
+              : "";
+          const badge =
+            m.status === "live"
+              ? `<span class="live-badge"><span class="live-dot"></span>${
+                  m.minute || "LIVE"
+                }</span>`
+              : `<span class="ft-badge">FT</span>`;
+          return `
             <div class="live-card${m.status === "live" ? " is-live" : ""}">
               <div class="live-card-top">
                 <span class="live-card-date">${vnTimeStr(m.dateUtc)} (VN)</span>
@@ -1569,8 +1542,31 @@
               </div>
               ${pen ? `<div class="live-pen">${pen}</div>` : ""}
             </div>`;
-          })
-          .join("");
+        };
+
+        // ĐANG ĐÁ — chỉ trận status "live"
+        if (liveSec && liveGrid) {
+          if (playing.length) {
+            liveSec.style.display = "block";
+            liveGrid.innerHTML = playing.map(card).join("");
+          } else {
+            liveSec.style.display = "none";
+          }
+        }
+
+        // KẾT QUẢ GẦN ĐÂY — chỉ trận đã đá xong
+        if (finished.length) {
+          section.style.display = "block";
+          status.innerText =
+            lastSync.toLocaleTimeString("vi-VN", {
+              timeZone: "Asia/Ho_Chi_Minh",
+              hour: "2-digit",
+              minute: "2-digit",
+            }) + " (UTC+7)";
+          grid.innerHTML = finished.map(card).join("");
+        } else {
+          section.style.display = "none";
+        }
       }
 
       // Vẽ lại view đang mở để tỉ số mới chèn vào lịch
@@ -2608,25 +2604,17 @@
           </div>`;
       }
 
-      function bracketColumnHtml(col, isLast, isFirst) {
-        let body;
-        if (isLast) {
-          body = `<div class="bk-pair">${bracketCard(
-            col.matches[0],
-            !isFirst
-          )}</div>`;
-        } else {
-          const pairs = [];
-          for (let i = 0; i < col.matches.length; i += 2) {
-            pairs.push(
-              `<div class="bk-pair j">${bracketCard(
-                col.matches[i],
+      function bracketColumnHtml(col, colIndex, isLast, isFirst) {
+        const slotH = 116 * Math.pow(2, colIndex);
+        const body = col.matches
+          .map(
+            (m) =>
+              `<div class="bk-slot" style="--slot-h:${slotH}px">${bracketCard(
+                m,
                 !isFirst
-              )}${bracketCard(col.matches[i + 1], !isFirst)}</div>`
-            );
-          }
-          body = pairs.join("");
-        }
+              )}</div>`
+          )
+          .join("");
         return `<div class="bk-round"><div class="bk-rtitle">${col.title}</div><div class="bk-body">${body}</div></div>`;
       }
 
@@ -2640,7 +2628,7 @@
         const cols = bracketColumns();
         const html = cols
           .map((col, i) =>
-            bracketColumnHtml(col, i === cols.length - 1, i === 0)
+            bracketColumnHtml(col, i, i === cols.length - 1, i === 0)
           )
           .join("");
         document.getElementById(
